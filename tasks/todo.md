@@ -106,10 +106,10 @@
 ## Task 7: Streamlit UI - Disease Diagnosis Tab
 **Description:** Build Tab 1 in `app.py`: Crop selection dropdown, multi-select symptom checklist, weather conditions radio, and responsive diagnosis card displaying disease name, certainty %, and treatment recommendations.
 **Acceptance criteria:**
-- [ ] Matches all Tab 1 specifications in `expert-system.md`.
-- [ ] Fast rendering (< 500ms) with clean layout and responsive columns.
+- [x] Matches all Tab 1 specifications in `expert-system.md`.
+- [x] Fast rendering (< 500ms) with clean layout and responsive columns.
 **Verification:**
-- [ ] Syntax check and headless test of app module.
+- [x] Syntax check and headless test of app module.
 **Dependencies:** Tasks 4, 5
 **Files likely touched:**
 - `app.py`
