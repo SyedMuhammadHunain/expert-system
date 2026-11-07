@@ -54,11 +54,11 @@
 ## Task 4: Pure Python Inference Engine
 **Description:** Implement forward-chaining rule inference engine in `inference_engine.py` that evaluates facts against knowledge base rules, resolves Certainty Factors, executes rule extensions, and handles conflict resolution.
 **Acceptance criteria:**
-- [ ] Evaluates exact matches (hardcoded), uncertain matches (may or may not), and extended rules.
-- [ ] Returns structured `InferenceResult` in < 1.0s.
-- [ ] Gracefully handles unrecognized input with safe empty/boundary flag rather than throwing unhandled exceptions.
+- [x] Evaluates exact matches (hardcoded), uncertain matches (may or may not), and extended rules.
+- [x] Returns structured `InferenceResult` in < 1.0s.
+- [x] Gracefully handles unrecognized input with safe empty/boundary flag rather than throwing unhandled exceptions.
 **Verification:**
-- [ ] Python tests executing queries for known and unknown cases.
+- [x] Python tests executing queries for known and unknown cases.
 **Dependencies:** Tasks 2, 3
 **Files likely touched:**
 - `inference_engine.py`
