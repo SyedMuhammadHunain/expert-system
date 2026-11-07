@@ -19,11 +19,11 @@
 ## Task 2: 50+ Agricultural Rules Codification
 **Description:** Codify minimum 50 realistic agricultural rules for Pakistan across 5 crops (Wheat, Cotton, Rice, Sugarcane, Maize) covering diseases, pests, and nutrient deficiencies. Include hardcoded (1.0 CF), may-or-may-not (0.4-0.85 CF), and extended rule variants.
 **Acceptance criteria:**
-- [ ] Total rule count >= 50.
-- [ ] All 5 crops have coverage across Disease, Pest, and Nutrient categories.
-- [ ] Each rule specifies remedies, severity, or fertilizer formulas.
+- [x] Total rule count >= 50.
+- [x] All 5 crops have coverage across Disease, Pest, and Nutrient categories.
+- [x] Each rule specifies remedies, severity, or fertilizer formulas.
 **Verification:**
-- [ ] Python assertion script confirms `len(RULES) >= 50`.
+- [x] Python assertion script confirms `len(RULES) >= 50`.
 **Dependencies:** Task 1
 **Files likely touched:**
 - `knowledge_base.py`
@@ -32,8 +32,8 @@
 ---
 
 ## Checkpoint 1: Foundation Checkpoint
-- [ ] `requirements.txt` ready
-- [ ] >= 50 valid rules loaded in `knowledge_base.py`
+- [x] `requirements.txt` ready
+- [x] >= 50 valid rules loaded in `knowledge_base.py` (60 rules codified)
 
 ---
 
