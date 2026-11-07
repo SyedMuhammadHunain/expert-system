@@ -66,3 +66,34 @@ def test_pest_tab_pre_harvest_lockout():
     error_texts = [e.value for e in at.error]
     assert any("PRE-HARVEST SAFETY LOCKOUT" in e for e in error_texts)
 
+
+def test_nutrient_tab_deficiency_prescription():
+    at = AppTest.from_file("../app.py")
+    at.run(timeout=10)
+
+    # Wheat vegetative lower leaves yellowing -> Nitrogen
+    at.selectbox("nut_crop_select").select("wheat")
+    at.selectbox("nut_stage_select").select("vegetative")
+    at.selectbox("nut_discoloration_select").select("lower_leaves_yellowing")
+    at.slider("nut_ph_slider").set_value(8.0)
+    at.button("nut_submit_btn").click().run(timeout=10)
+
+    assert not at.exception
+    info_texts = [i.value for i in at.info]
+    assert any("Nitrogen" in i for i in info_texts)
+
+
+def test_nutrient_tab_soil_acidity_fix():
+    at = AppTest.from_file("../app.py")
+    at.run(timeout=10)
+
+    # Universal acidic soil (pH 5.0)
+    at.selectbox("nut_crop_select").select("all")
+    at.slider("nut_ph_slider").set_value(5.0)
+    at.button("nut_submit_btn").click().run(timeout=10)
+
+    assert not at.exception
+    info_texts = [i.value for i in at.info]
+    assert any("Soil Acidity Fix" in i for i in info_texts)
+
+

@@ -403,8 +403,135 @@ with tab_pest:
 
 
 # ============================================================================
-# TAB 3: NUTRIENT DEFICIENCY (Placeholder for Task 9)
+# TAB 3: NUTRIENT DEFICIENCY & FERTILIZER PRESCRIPTION
 # ============================================================================
 with tab_nutrient:
-    st.subheader("Nutrient Deficiency & Fertilizer Prescription")
-    st.caption("Module will be loaded in Task 9.")
+    st.subheader("Nutrient Deficiency Identification & Fertilizer Prescription")
+    st.info(
+        "Analyze leaf discoloration patterns, crop growth stage, and soil pH to calculate exact "
+        "NPK fertilizer dosages (Urea, DAP, SOP) and soil chemical remediation (Lime / Gypsum).",
+        icon=":material/compost:"
+    )
+
+    col_nut_in, col_nut_out = st.columns([1, 1], gap="medium")
+
+    with col_nut_in:
+        with st.container(border=True):
+            st.markdown("#### 🧪 Soil & Foliage Input Form")
+
+            nut_crop_options = ["all"] + list(CROPS_DISPLAY.keys())
+            nut_crop_key = st.selectbox(
+                "Target Crop (فصل منتخب کریں)",
+                options=nut_crop_options,
+                format_func=lambda k: "All Crops / Universal Soil Check" if k == "all" else CROPS_DISPLAY[k],
+                key="nut_crop_select"
+            )
+
+            crop_stage = st.selectbox(
+                "Crop Growth Stage (فصل کا مرحلہ)",
+                options=["vegetative", "flowering", "fruiting"],
+                format_func=lambda s: {
+                    "vegetative": "🌿 Vegetative / Tillering Stage (شاخیں نکلنے کا مرحلہ)",
+                    "flowering": "🌸 Flowering / Boot Stage (پھول اور گوبھ کا مرحلہ)",
+                    "fruiting": "🌾 Fruiting / Boll-fill / Grain Formation (پھل / سٹہ بننے کا مرحلہ)"
+                }.get(s, s.title()),
+                key="nut_stage_select"
+            )
+
+            leaf_discoloration = st.selectbox(
+                "Leaf Discoloration Map (پتوں کی رنگت میں تبدیلی)",
+                options=[
+                    "none",
+                    "lower_leaves_yellowing",
+                    "leaf_edges_scorched_brown",
+                    "purple_leaf_undersides",
+                    "interveinal_chlorosis"
+                ],
+                format_func=lambda d: {
+                    "none": "No significant discoloration (کوئی خاص رنگت نہیں)",
+                    "lower_leaves_yellowing": "Lower / older leaves yellowing (نچلے پتے پیلے ہونا)",
+                    "leaf_edges_scorched_brown": "Leaf edges scorched brown / necrosis (پتوں کے کنارے جھلسے ہوئے)",
+                    "purple_leaf_undersides": "Purple leaf undersides / anthocyanin (پتوں کی نچلی سطح جامنی ہونا)",
+                    "interveinal_chlorosis": "Interveinal chlorosis / white bleached bands (رگوں کے درمیان پیلا پن)"
+                }.get(d, d.replace("_", " ").title()),
+                key="nut_discoloration_select"
+            )
+
+            soil_ph = st.slider(
+                "Measured Soil pH (زمین کی پی ایچ)",
+                min_value=4.5,
+                max_value=8.5,
+                value=7.8,
+                step=0.1,
+                help="Typical Pakistani Indus Basin soils are alkaline (pH 7.8 - 8.5). Acidic soils (< 6.0) require agricultural lime.",
+                key="nut_ph_slider"
+            )
+
+            # Interactive Soil pH Indicator
+            if soil_ph < 5.5:
+                st.error(f"Soil Status: Strongly Acidic (pH {soil_ph}) — High risk of Al/Mn toxicity.")
+            elif soil_ph > 8.2:
+                st.warning(f"Soil Status: Strongly Alkaline / Sodic (pH {soil_ph}) — Zn/Fe micronutrients locked.")
+            else:
+                st.success(f"Soil Status: Optimal / Moderately Alkaline (pH {soil_ph}) — Standard Indus plain range.")
+
+            diagnose_nut_btn = st.button(
+                "🌾 Prescribe Fertilizer & Soil Fix",
+                width="stretch",
+                type="primary",
+                key="nut_submit_btn"
+            )
+
+    with col_nut_out:
+        with st.container(border=True):
+            st.markdown("#### 📋 Expert Soil & Fertilizer Prescription")
+
+            if diagnose_nut_btn:
+                wm_nut = WorkingMemory()
+                wm_nut.assert_fact("crop", nut_crop_key)
+                wm_nut.assert_fact("stage", crop_stage)
+                wm_nut.assert_fact("soil_ph", soil_ph)
+                if leaf_discoloration != "none":
+                    wm_nut.assert_fact("discoloration", leaf_discoloration)
+
+                t_start = time.perf_counter()
+                nut_result: InferenceResult = engine.evaluate(wm_nut, Category.NUTRIENT)
+                latency = (time.perf_counter() - t_start) * 1000
+
+                nut_explanation = explainer.explain(nut_result, wm_nut)
+
+                if nut_result.success:
+                    # Missing nutrient badge (as specified: st.info("Deficiency: ..."))
+                    st.info(f"### Deficiency Identified: {nut_result.diagnosis}", icon=":material/science:")
+
+                    n1, n2, n3 = st.columns(3)
+                    n1.metric("Certainty Score", f"{nut_result.confidence}%")
+                    n2.metric("Soil pH", f"{soil_ph}")
+                    n3.metric("Latency", f"{latency:.2f} ms")
+
+                    # Prescribed NPK fertilizer dosage card
+                    st.markdown("##### 📦 Prescribed NPK & Soil Remediation Card:")
+                    for idx, rem in enumerate(nut_result.remedies, 1):
+                        st.markdown(f"- **{rem}**")
+
+                    # Recovery timeline estimate (as specified: st.caption("Expected foliage recovery: ..."))
+                    timeline_val = nut_result.details.get("recovery_timeline", "7-14 days")
+                    st.caption(f"⏱️ **Expected foliage recovery timeline:** {timeline_val}")
+
+                    with st.expander("🔎 View Expert Decision Trail & Soil Chemistry Reasoning"):
+                        for s in nut_explanation.get("steps", []):
+                            st.markdown(f"**{s['step']}**: {s['detail']}")
+                        st.caption(f"System boundary: {nut_explanation.get('limitations')}")
+
+                else:
+                    st.warning(f"### {nut_result.diagnosis}")
+                    st.markdown(
+                        "No acute nutrient deficit was detected for the provided combination. "
+                        "Maintain standard NPK basal application for this crop."
+                    )
+                    with st.expander("🔎 System Boundary Limitation Audit"):
+                        for s in nut_explanation.get("steps", []):
+                            st.markdown(f"**{s['step']}**: {s['detail']}")
+            else:
+                st.caption("Adjust foliage discoloration, growth stage, and soil pH, then click **Prescribe Fertilizer & Soil Fix**.")
+

@@ -134,10 +134,10 @@
 ## Task 9: Streamlit UI - Soil & Fertilizer Prescription Tab
 **Description:** Build Tab 3 in `app.py`: Growth stage selector, leaf discoloration map, soil pH slider (4.5 to 8.5), displaying missing nutrient badge, NPK fertilizer dosage card, and foliage recovery timeline.
 **Acceptance criteria:**
-- [ ] Matches all Tab 3 specifications in `expert-system.md`.
-- [ ] Outputs exact NPK dosage per acre and pH remediation guidance.
+- [x] Matches all Tab 3 specifications in `expert-system.md`.
+- [x] Outputs exact NPK dosage per acre and pH remediation guidance.
 **Verification:**
-- [ ] Verification of calculations against soil pH ranges and discoloration symptoms.
+- [x] Verification of calculations against soil pH ranges and discoloration symptoms.
 **Dependencies:** Tasks 4, 5
 **Files likely touched:**
 - `app.py`
