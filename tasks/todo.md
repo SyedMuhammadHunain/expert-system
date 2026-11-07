@@ -84,11 +84,11 @@
 ## Task 6: Comprehensive Unit Test Suite
 **Description:** Build test suite in `tests/test_rules.py` covering rule count assertion (>= 50), rule firing across all 5 crops, certainty factor mechanics, safety constraints, and edge case resilience.
 **Acceptance criteria:**
-- [ ] `pytest tests/` passes 100%.
-- [ ] `assert len(RULES) >= 50` passes.
-- [ ] Tests verify pre-harvest chemical restrictions and fault tolerance.
+- [x] `pytest tests/` passes 100%.
+- [x] `assert len(RULES) >= 50` passes.
+- [x] Tests verify pre-harvest chemical restrictions and fault tolerance.
 **Verification:**
-- [ ] Run `pytest -v tests/`.
+- [x] Run `pytest -v tests/`.
 **Dependencies:** Tasks 2, 3, 4, 5
 **Files likely touched:**
 - `tests/test_rules.py`
@@ -97,9 +97,9 @@
 ---
 
 ## Checkpoint 2: Engine & Core Logic Checkpoint
-- [ ] All unit tests pass with `pytest`
-- [ ] Latency verified < 1.0 second
-- [ ] Explanation traces generated cleanly
+- [x] All unit tests pass with `pytest` (16/16 passed in 0.03s)
+- [x] Latency verified < 1.0 second (measured ~0.012ms)
+- [x] Explanation traces generated cleanly
 
 ---
 
