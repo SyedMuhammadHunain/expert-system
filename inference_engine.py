@@ -107,31 +107,7 @@ class InferenceEngine:
             or "Identified Condition"
         )
 
-        # Pre-harvest safety lockout detection
-        chemical_blocked = False
-        remedies: List[str] = []
-
-        if category == Category.PEST:
-            bio_controls = conc.get("bio_controls", [])
-            chem_controls = conc.get("chemical_controls", [])
-            near_harvest = bool(memory.get_fact_value("near_harvest", False))
-
-            if near_harvest or any("BLOCKED" in str(c) for c in chem_controls):
-                chemical_blocked = True
-                remedies.extend(bio_controls)
-                remedies.append("SAFETY WARNING: Synthetic chemical insecticides blocked due to harvest proximity!")
-            else:
-                remedies.extend(bio_controls)
-                remedies.extend(chem_controls)
-        elif category == Category.DISEASE:
-            remedies = conc.get("remedies", [])
-        elif category == Category.NUTRIENT:
-            prescription = conc.get("prescription")
-            timeline = conc.get("recovery_timeline")
-            if prescription:
-                remedies.append(f"Prescription: {prescription}")
-            if timeline:
-                remedies.append(f"Expected recovery: {timeline}")
+        remedies, chemical_blocked = self._extract_remedies(category, conc, memory)
 
         details = dict(conc)
         details["latency_ms"] = round(elapsed_ms, 2)
@@ -150,6 +126,35 @@ class InferenceEngine:
             traces=[trace]
         )
 
+    def _extract_remedies(
+        self, category: Category, conc: Dict[str, Any], memory: WorkingMemory
+    ) -> Tuple[List[str], bool]:
+        """Extract remedies and enforce pre-harvest chemical lockout."""
+        chemical_blocked = False
+        remedies: List[str] = []
+
+        if category == Category.PEST:
+            bio_controls = conc.get("bio_controls", [])
+            chem_controls = conc.get("chemical_controls", [])
+            near_harvest = bool(memory.get_fact_value("near_harvest", False))
+
+            if near_harvest or any("BLOCKED" in str(c) for c in chem_controls):
+                chemical_blocked = True
+                remedies.extend(bio_controls)
+                remedies.append("SAFETY WARNING: Synthetic chemical insecticides blocked due to harvest proximity!")
+            else:
+                remedies.extend(bio_controls)
+                remedies.extend(chem_controls)
+        elif category == Category.DISEASE:
+            remedies = list(conc.get("remedies", []))
+        elif category == Category.NUTRIENT:
+            if prescription := conc.get("prescription"):
+                remedies.append(f"Prescription: {prescription}")
+            if timeline := conc.get("recovery_timeline"):
+                remedies.append(f"Expected recovery: {timeline}")
+
+        return remedies, chemical_blocked
+
     def _check_conditions(
         self, conditions: Dict[str, Any], memory: WorkingMemory
     ) -> Tuple[bool, Dict[str, Any]]:
@@ -158,23 +163,17 @@ class InferenceEngine:
 
         for key, cond_val in conditions.items():
             if key == "symptoms":
-                # User symptoms in working memory (list)
                 user_symptoms = memory.get_fact_value("symptoms", [])
-                if not isinstance(user_symptoms, list):
-                    user_symptoms = [user_symptoms]
-                # Rule requires all listed symptoms
-                if not all(s in user_symptoms for s in cond_val):
+                user_list = user_symptoms if isinstance(user_symptoms, list) else [user_symptoms]
+                if not all(s in user_list for s in cond_val):
                     return False, {}
                 fired_conds[key] = cond_val
 
             elif key == "damage":
                 user_damage = memory.get_fact_value("damage", [])
-                if isinstance(user_damage, list):
-                    if cond_val not in user_damage:
-                        return False, {}
-                else:
-                    if cond_val != user_damage:
-                        return False, {}
+                user_list = user_damage if isinstance(user_damage, list) else [user_damage]
+                if cond_val not in user_list:
+                    return False, {}
                 fired_conds[key] = cond_val
 
             elif key == "ph_min":
@@ -191,9 +190,7 @@ class InferenceEngine:
 
             else:
                 user_val = memory.get_fact_value(key, None)
-                if user_val is None:
-                    return False, {}
-                if str(user_val).lower() != str(cond_val).lower():
+                if user_val is None or str(user_val).lower() != str(cond_val).lower():
                     return False, {}
                 fired_conds[key] = cond_val
 

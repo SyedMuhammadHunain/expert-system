@@ -32,6 +32,28 @@ def get_system_components() -> Tuple[InferenceEngine, ExplanationModule]:
 
 engine, explainer = get_system_components()
 
+
+def render_modality_badge(rule_type: str, confidence: float) -> None:
+    """Render informative badge explaining rule modality."""
+    if rule_type == "hardcoded":
+        st.caption("🔖 **Rule Modality:** Hardcoded Deterministic (100% textbook match)")
+    elif rule_type == "may_or_may_not":
+        st.caption(f"🔖 **Rule Modality:** Probabilistic Inference ({confidence}% Certainty Factor)")
+    elif rule_type == "extended":
+        st.caption("🔖 **Rule Modality:** Extended Rule (Weather/Harvest/Safety Escalation)")
+
+
+def render_explanation_expander(
+    explanation: Dict[str, Any], title: str = "View Expert Decision Trail & Reasoning"
+) -> None:
+    """Render reasoning steps and system boundary limitations."""
+    with st.expander(f"🔎 {title}"):
+        for s in explanation.get("steps", []):
+            st.markdown(f"**{s['step']}**: {s['detail']}")
+        if limits := explanation.get("limitations"):
+            st.caption(f"System boundary: {limits}")
+
+
 # Crop Display Mapping
 CROPS_DISPLAY: Dict[str, str] = {
     "wheat": "Wheat (گندم - Gandum)",
@@ -214,24 +236,14 @@ with tab_disease:
                     m3.metric("Latency", f"{latency:.2f} ms")
 
                     # Rule Category Badge
-                    rule_type = result.details.get("rule_type", "hardcoded")
-                    if rule_type == "hardcoded":
-                        st.caption("🔖 **Rule Modality:** Hardcoded Deterministic (100% textbook match)")
-                    elif rule_type == "may_or_may_not":
-                        st.caption(f"🔖 **Rule Modality:** Probabilistic Inference ({result.confidence}% Certainty Factor)")
-                    elif rule_type == "extended":
-                        st.caption("🔖 **Rule Modality:** Extended Rule (Weather/Environmental Escalation)")
+                    render_modality_badge(result.details.get("rule_type", "hardcoded"), result.confidence)
 
                     # Treatment Remedies
                     st.markdown("##### 💊 Prescribed Remedies & Solutions:")
                     for idx, remedy in enumerate(result.remedies, 1):
                         st.markdown(f"**{idx}.** {remedy}")
 
-                    # Explanation Chain Expander
-                    with st.expander("🔎 View Expert Decision Trail & Reasoning"):
-                        for s in explanation.get("steps", []):
-                            st.markdown(f"**{s['step']}**: {s['detail']}")
-                        st.caption(f"System boundary: {explanation.get('limitations')}")
+                    render_explanation_expander(explanation)
 
                 else:
                     st.warning(f"### {result.diagnosis}")
@@ -243,9 +255,7 @@ with tab_disease:
                     for idx, rem in enumerate(result.remedies, 1):
                         st.markdown(f"**{idx}.** {rem}")
 
-                    with st.expander("🔎 System Boundary Limitation Audit"):
-                        for s in explanation.get("steps", []):
-                            st.markdown(f"**{s['step']}**: {s['detail']}")
+                    render_explanation_expander(explanation, title="System Boundary Limitation Audit")
             else:
                 st.caption("Select crop symptoms on the left and click **Diagnose Disease** to view findings.")
 
@@ -410,10 +420,7 @@ with tab_pest:
                         for c in chem_remedies:
                             st.markdown(f"- {c}")
 
-                    with st.expander("🔎 View Expert Decision Trail & IPM Reasoning"):
-                        for s in pest_explanation.get("steps", []):
-                            st.markdown(f"**{s['step']}**: {s['detail']}")
-                        st.caption(f"System boundary: {pest_explanation.get('limitations')}")
+                    render_explanation_expander(pest_explanation, title="View Expert Decision Trail & IPM Reasoning")
 
                 else:
                     st.warning(f"### {pest_result.diagnosis}")
@@ -421,9 +428,7 @@ with tab_pest:
                         "The observed pest signature does not match any recognized pest pattern in the database. "
                         "Please inspect the field with your local extension agent."
                     )
-                    with st.expander("🔎 System Boundary Limitation Audit"):
-                        for s in pest_explanation.get("steps", []):
-                            st.markdown(f"**{s['step']}**: {s['detail']}")
+                    render_explanation_expander(pest_explanation, title="System Boundary Limitation Audit")
             else:
                 st.caption("Provide pest observation signs on the left and click **Identify Pest & Get Solutions**.")
 
@@ -556,10 +561,7 @@ with tab_nutrient:
                     timeline_val = nut_result.details.get("recovery_timeline", "7-14 days")
                     st.caption(f"⏱️ **Expected foliage recovery timeline:** {timeline_val}")
 
-                    with st.expander("🔎 View Expert Decision Trail & Soil Chemistry Reasoning"):
-                        for s in nut_explanation.get("steps", []):
-                            st.markdown(f"**{s['step']}**: {s['detail']}")
-                        st.caption(f"System boundary: {nut_explanation.get('limitations')}")
+                    render_explanation_expander(nut_explanation, title="View Expert Decision Trail & Soil Chemistry Reasoning")
 
                 else:
                     st.warning(f"### {nut_result.diagnosis}")
@@ -567,9 +569,7 @@ with tab_nutrient:
                         "No acute nutrient deficit was detected for the provided combination. "
                         "Maintain standard NPK basal application for this crop."
                     )
-                    with st.expander("🔎 System Boundary Limitation Audit"):
-                        for s in nut_explanation.get("steps", []):
-                            st.markdown(f"**{s['step']}**: {s['detail']}")
+                    render_explanation_expander(nut_explanation, title="System Boundary Limitation Audit")
             else:
                 st.caption("Adjust foliage discoloration, growth stage, and soil pH, then click **Prescribe Fertilizer & Soil Fix**.")
 
