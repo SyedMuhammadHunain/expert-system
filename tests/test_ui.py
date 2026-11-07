@@ -15,7 +15,7 @@ def test_disease_tab_diagnosis():
 
     # Wheat Brown Rust (May or may not rule)
     at.multiselect("dis_symptoms_select").select("brown_oval_pustules")
-    at.button("dis_submit_btn").click().run(timeout=10)
+    at.button[0].click().run(timeout=10)
 
     assert not at.exception
     success_texts = [s.value for s in at.success]
@@ -27,7 +27,7 @@ def test_disease_tab_unknown_boundary():
     at.run(timeout=10)
 
     # Empty symptoms trigger warning
-    at.button("dis_submit_btn").click().run(timeout=10)
+    at.button[0].click().run(timeout=10)
     assert not at.exception
     warning_texts = [w.value for w in at.warning]
     assert any("at least one observed symptom" in w for w in warning_texts)
@@ -42,7 +42,7 @@ def test_pest_tab_identification():
     at.selectbox("pest_zone_select").select("fruit")
     at.multiselect("pest_damage_multiselect").select("bore_holes")
     at.radio("pest_sighting_radio").set_value("caterpillars")
-    at.button("pest_submit_btn").click().run(timeout=10)
+    at.button[1].click().run(timeout=10)
 
     assert not at.exception
     success_texts = [s.value for s in at.success]
@@ -59,10 +59,9 @@ def test_pest_tab_pre_harvest_lockout():
     at.multiselect("pest_damage_multiselect").select("bore_holes")
     at.radio("pest_sighting_radio").set_value("caterpillars")
     at.toggle("pest_harvest_toggle").set_value(True)
-    at.button("pest_submit_btn").click().run(timeout=10)
+    at.button[1].click().run(timeout=10)
 
     assert not at.exception
-    # Check that error/alert lockout banner appeared
     error_texts = [e.value for e in at.error]
     assert any("PRE-HARVEST SAFETY LOCKOUT" in e for e in error_texts)
 
@@ -76,7 +75,7 @@ def test_nutrient_tab_deficiency_prescription():
     at.selectbox("nut_stage_select").select("vegetative")
     at.selectbox("nut_discoloration_select").select("lower_leaves_yellowing")
     at.slider("nut_ph_slider").set_value(8.0)
-    at.button("nut_submit_btn").click().run(timeout=10)
+    at.button[2].click().run(timeout=10)
 
     assert not at.exception
     info_texts = [i.value for i in at.info]
@@ -90,10 +89,8 @@ def test_nutrient_tab_soil_acidity_fix():
     # Universal acidic soil (pH 5.0)
     at.selectbox("nut_crop_select").select("all")
     at.slider("nut_ph_slider").set_value(5.0)
-    at.button("nut_submit_btn").click().run(timeout=10)
+    at.button[2].click().run(timeout=10)
 
     assert not at.exception
     info_texts = [i.value for i in at.info]
     assert any("Soil Acidity Fix" in i for i in info_texts)
-
-

@@ -135,7 +135,7 @@ with tab_disease:
     col_in, col_out = st.columns([1, 1], gap="medium")
 
     with col_in:
-        with st.container(border=True):
+        with st.form("disease_form", border=True):
             st.markdown("#### 📋 Field Disease Observation Form")
             selected_crop_key = st.selectbox(
                 "Select Crop (فصل منتخب کریں)",
@@ -161,77 +161,91 @@ with tab_disease:
                 key="dis_weather_radio"
             )
 
-            diagnose_disease_btn = st.button(
+            diagnose_disease_btn = st.form_submit_button(
                 "🔍 Diagnose Disease (تشخیص کریں)",
                 width="stretch",
-                type="primary",
-                key="dis_submit_btn"
+                type="primary"
             )
+
+            if diagnose_disease_btn:
+                try:
+                    if not selected_symptom_keys:
+                        st.session_state["dis_error"] = "Please select at least one observed symptom before diagnosing."
+                        st.session_state.pop("dis_result", None)
+                    else:
+                        st.session_state.pop("dis_error", None)
+                        wm = WorkingMemory()
+                        wm.assert_fact("crop", selected_crop_key)
+                        wm.assert_fact("symptoms", selected_symptom_keys)
+                        if weather_choice != "normal":
+                            wm.assert_fact("weather", weather_choice)
+
+                        t_start = time.perf_counter()
+                        res: InferenceResult = engine.evaluate(wm, Category.DISEASE)
+                        lat = (time.perf_counter() - t_start) * 1000
+                        exp = explainer.explain(res, wm)
+                        st.session_state["dis_result"] = {
+                            "result": res,
+                            "latency": lat,
+                            "explanation": exp
+                        }
+                except Exception as e:
+                    st.error(f"Inference error: {e}")
 
     with col_out:
         with st.container(border=True):
             st.markdown("#### 🩺 Expert System Diagnostic Report")
 
-            if diagnose_disease_btn:
-                if not selected_symptom_keys:
-                    st.warning("⚠️ Please select at least one observed symptom before diagnosing.")
+            if st.session_state.get("dis_error"):
+                st.warning(f"⚠️ {st.session_state['dis_error']}")
+            elif "dis_result" in st.session_state:
+                item = st.session_state["dis_result"]
+                result: InferenceResult = item["result"]
+                latency = item["latency"]
+                explanation = item["explanation"]
+
+                if result.success:
+                    st.success(f"### {result.diagnosis}")
+
+                    # Metrics row
+                    m1, m2, m3 = st.columns(3)
+                    m1.metric("Certainty Score", f"{result.confidence}%")
+                    m2.metric("Severity", result.details.get("severity", "Moderate"))
+                    m3.metric("Latency", f"{latency:.2f} ms")
+
+                    # Rule Category Badge
+                    rule_type = result.details.get("rule_type", "hardcoded")
+                    if rule_type == "hardcoded":
+                        st.caption("🔖 **Rule Modality:** Hardcoded Deterministic (100% textbook match)")
+                    elif rule_type == "may_or_may_not":
+                        st.caption(f"🔖 **Rule Modality:** Probabilistic Inference ({result.confidence}% Certainty Factor)")
+                    elif rule_type == "extended":
+                        st.caption("🔖 **Rule Modality:** Extended Rule (Weather/Environmental Escalation)")
+
+                    # Treatment Remedies
+                    st.markdown("##### 💊 Prescribed Remedies & Solutions:")
+                    for idx, remedy in enumerate(result.remedies, 1):
+                        st.markdown(f"**{idx}.** {remedy}")
+
+                    # Explanation Chain Expander
+                    with st.expander("🔎 View Expert Decision Trail & Reasoning"):
+                        for s in explanation.get("steps", []):
+                            st.markdown(f"**{s['step']}**: {s['detail']}")
+                        st.caption(f"System boundary: {explanation.get('limitations')}")
+
                 else:
-                    # Initialize working memory for this query
-                    wm = WorkingMemory()
-                    wm.assert_fact("crop", selected_crop_key)
-                    wm.assert_fact("symptoms", selected_symptom_keys)
-                    if weather_choice != "normal":
-                        wm.assert_fact("weather", weather_choice)
+                    st.warning(f"### {result.diagnosis}")
+                    st.markdown(
+                        "The expert system could not match these specific symptoms with high confidence. "
+                        "To protect crop health, the system avoids speculative guessing."
+                    )
+                    st.markdown("##### 💡 Recommended Next Actions:")
+                    for idx, rem in enumerate(result.remedies, 1):
+                        st.markdown(f"**{idx}.** {rem}")
 
-                    # Execute inference
-                    t_start = time.perf_counter()
-                    result: InferenceResult = engine.evaluate(wm, Category.DISEASE)
-                    latency = (time.perf_counter() - t_start) * 1000
-
-                    explanation = explainer.explain(result, wm)
-
-                    if result.success:
-                        st.success(f"### {result.diagnosis}")
-
-                        # Metrics row
-                        m1, m2, m3 = st.columns(3)
-                        m1.metric("Certainty Score", f"{result.confidence}%")
-                        m2.metric("Severity", result.details.get("severity", "Moderate"))
-                        m3.metric("Latency", f"{latency:.2f} ms")
-
-                        # Rule Category Badge
-                        rule_type = result.details.get("rule_type", "hardcoded")
-                        if rule_type == "hardcoded":
-                            st.caption("🔖 **Rule Modality:** Hardcoded Deterministic (100% textbook match)")
-                        elif rule_type == "may_or_may_not":
-                            st.caption(f"🔖 **Rule Modality:** Probabilistic Inference ({result.confidence}% Certainty Factor)")
-                        elif rule_type == "extended":
-                            st.caption("🔖 **Rule Modality:** Extended Rule (Weather/Environmental Escalation)")
-
-                        # Treatment Remedies
-                        st.markdown("##### 💊 Prescribed Remedies & Solutions:")
-                        for idx, remedy in enumerate(result.remedies, 1):
-                            st.markdown(f"**{idx}.** {remedy}")
-
-                        # Explanation Chain Expander
-                        with st.expander("🔎 View Expert Decision Trail & Reasoning"):
-                            for s in explanation.get("steps", []):
-                                st.markdown(f"**{s['step']}**: {s['detail']}")
-                            st.caption(f"System boundary: {explanation.get('limitations')}")
-
-                    else:
-                        st.warning(f"### {result.diagnosis}")
-                        st.markdown(
-                            "The expert system could not match these specific symptoms with high confidence. "
-                            "To protect crop health, the system avoids speculative guessing."
-                        )
-                        st.markdown("##### 💡 Recommended Next Actions:")
-                        for idx, rem in enumerate(result.remedies, 1):
-                            st.markdown(f"**{idx}.** {rem}")
-
-                        with st.expander("🔎 System Boundary Limitation Audit"):
-                            for s in explanation.get("steps", []):
-                                st.markdown(f"**{s['step']}**: {s['detail']}")
+                    with st.expander("🔎 System Boundary Limitation Audit"):
+                        for s in explanation.get("steps", []):
+                            st.markdown(f"**{s['step']}**: {s['detail']}")
             else:
                 st.caption("Select crop symptoms on the left and click **Diagnose Disease** to view findings.")
 
@@ -250,7 +264,7 @@ with tab_pest:
     col_pest_in, col_pest_out = st.columns([1, 1], gap="medium")
 
     with col_pest_in:
-        with st.container(border=True):
+        with st.form("pest_form", border=True):
             st.markdown("#### 🐛 Pest Observation Form")
             pest_crop_key = st.selectbox(
                 "Select Crop (فصل)",
@@ -322,21 +336,18 @@ with tab_pest:
                 key="pest_harvest_toggle"
             )
 
-            diagnose_pest_btn = st.button(
+            diagnose_pest_btn = st.form_submit_button(
                 "🛡️ Identify Pest & Get Solutions",
                 width="stretch",
-                type="primary",
-                key="pest_submit_btn"
+                type="primary"
             )
-
-    with col_pest_out:
-        with st.container(border=True):
-            st.markdown("#### 🔍 Pest Identification & IPM Advisory")
 
             if diagnose_pest_btn:
                 if not visible_damage_list and pest_sighting == "none_seen":
-                    st.warning("⚠️ Please select visible plant damage signs or observed insect sightings.")
+                    st.session_state["pest_error"] = "Please select visible plant damage signs or observed insect sightings."
+                    st.session_state.pop("pest_result", None)
                 else:
+                    st.session_state.pop("pest_error", None)
                     wm_pest = WorkingMemory()
                     wm_pest.assert_fact("crop", pest_crop_key)
                     wm_pest.assert_fact("plant_zone", plant_zone)
@@ -348,55 +359,71 @@ with tab_pest:
                         wm_pest.assert_fact("near_harvest", True)
 
                     t_start = time.perf_counter()
-                    pest_result: InferenceResult = engine.evaluate(wm_pest, Category.PEST)
-                    latency = (time.perf_counter() - t_start) * 1000
+                    p_res: InferenceResult = engine.evaluate(wm_pest, Category.PEST)
+                    p_lat = (time.perf_counter() - t_start) * 1000
+                    p_exp = explainer.explain(p_res, wm_pest)
+                    st.session_state["pest_result"] = {
+                        "result": p_res,
+                        "latency": p_lat,
+                        "explanation": p_exp
+                    }
 
-                    pest_explanation = explainer.explain(pest_result, wm_pest)
+    with col_pest_out:
+        with st.container(border=True):
+            st.markdown("#### 🔍 Pest Identification & IPM Advisory")
 
-                    if pest_result.success:
-                        st.success(f"### {pest_result.diagnosis}")
+            if st.session_state.get("pest_error"):
+                st.warning(f"⚠️ {st.session_state['pest_error']}")
+            elif "pest_result" in st.session_state:
+                p_item = st.session_state["pest_result"]
+                pest_result: InferenceResult = p_item["result"]
+                latency = p_item["latency"]
+                pest_explanation = p_item["explanation"]
 
-                        p1, p2, p3 = st.columns(3)
-                        p1.metric("Certainty Score", f"{pest_result.confidence}%")
-                        p2.metric("Severity Tier", pest_result.details.get("severity_tier", "Moderate"))
-                        p3.metric("Latency", f"{latency:.2f} ms")
+                if pest_result.success:
+                    st.success(f"### {pest_result.diagnosis}")
 
-                        # Pre-Harvest Lockout Warning Callout
-                        if pest_result.chemical_blocked:
-                            st.error(
-                                "🚨 **PRE-HARVEST SAFETY LOCKOUT TRIGGERED:**\n\n"
-                                "Crop harvest is imminent. Synthetic chemical sprays are **STRICTLY BLOCKED** "
-                                "to avoid toxic pesticide residue in grains and fiber. Only non-toxic biological "
-                                "and cultural controls are permitted.",
-                                icon=":material/gavel:"
-                            )
+                    p1, p2, p3 = st.columns(3)
+                    p1.metric("Certainty Score", f"{pest_result.confidence}%")
+                    p2.metric("Severity Tier", pest_result.details.get("severity_tier", "Moderate"))
+                    p3.metric("Latency", f"{latency:.2f} ms")
 
-                        # Biological Controls Column vs Chemical Insecticides
-                        st.markdown("##### 🐞 Biological & Cultural Controls:")
-                        bio_remedies = [r for r in pest_result.remedies if "BLOCKED" not in r and "SAFETY WARNING" not in r and "EC" not in r and "SC" not in r and "SL" not in r and "WG" not in r and "4G" not in r and "3G" not in r]
-                        for b in bio_remedies:
-                            st.markdown(f"- {b}")
-
-                        if not pest_result.chemical_blocked:
-                            st.markdown("##### 🧪 Chemical Insecticide Options (Apply with protective gear):")
-                            chem_remedies = [r for r in pest_result.remedies if r not in bio_remedies]
-                            for c in chem_remedies:
-                                st.markdown(f"- {c}")
-
-                        with st.expander("🔎 View Expert Decision Trail & IPM Reasoning"):
-                            for s in pest_explanation.get("steps", []):
-                                st.markdown(f"**{s['step']}**: {s['detail']}")
-                            st.caption(f"System boundary: {pest_explanation.get('limitations')}")
-
-                    else:
-                        st.warning(f"### {pest_result.diagnosis}")
-                        st.markdown(
-                            "The observed pest signature does not match any recognized pest pattern in the database. "
-                            "Please inspect the field with your local extension agent."
+                    # Pre-Harvest Lockout Warning Callout
+                    if pest_result.chemical_blocked:
+                        st.error(
+                            "🚨 **PRE-HARVEST SAFETY LOCKOUT TRIGGERED:**\n\n"
+                            "Crop harvest is imminent. Synthetic chemical sprays are **STRICTLY BLOCKED** "
+                            "to avoid toxic pesticide residue in grains and fiber. Only non-toxic biological "
+                            "and cultural controls are permitted.",
+                            icon=":material/gavel:"
                         )
-                        with st.expander("🔎 System Boundary Limitation Audit"):
-                            for s in pest_explanation.get("steps", []):
-                                st.markdown(f"**{s['step']}**: {s['detail']}")
+
+                    # Biological Controls Column vs Chemical Insecticides
+                    st.markdown("##### 🐞 Biological & Cultural Controls:")
+                    bio_remedies = [r for r in pest_result.remedies if "BLOCKED" not in r and "SAFETY WARNING" not in r and "EC" not in r and "SC" not in r and "SL" not in r and "WG" not in r and "4G" not in r and "3G" not in r]
+                    for b in bio_remedies:
+                        st.markdown(f"- {b}")
+
+                    if not pest_result.chemical_blocked:
+                        st.markdown("##### 🧪 Chemical Insecticide Options (Apply with protective gear):")
+                        chem_remedies = [r for r in pest_result.remedies if r not in bio_remedies]
+                        for c in chem_remedies:
+                            st.markdown(f"- {c}")
+
+                    with st.expander("🔎 View Expert Decision Trail & IPM Reasoning"):
+                        for s in pest_explanation.get("steps", []):
+                            st.markdown(f"**{s['step']}**: {s['detail']}")
+                        st.caption(f"System boundary: {pest_explanation.get('limitations')}")
+
+                else:
+                    st.warning(f"### {pest_result.diagnosis}")
+                    st.markdown(
+                        "The observed pest signature does not match any recognized pest pattern in the database. "
+                        "Please inspect the field with your local extension agent."
+                    )
+                    with st.expander("🔎 System Boundary Limitation Audit"):
+                        for s in pest_explanation.get("steps", []):
+                            st.markdown(f"**{s['step']}**: {s['detail']}")
             else:
                 st.caption("Provide pest observation signs on the left and click **Identify Pest & Get Solutions**.")
 
@@ -416,7 +443,7 @@ with tab_nutrient:
     col_nut_in, col_nut_out = st.columns([1, 1], gap="medium")
 
     with col_nut_in:
-        with st.container(border=True):
+        with st.form("nutrient_form", border=True):
             st.markdown("#### 🧪 Soil & Foliage Input Form")
 
             nut_crop_options = ["all"] + list(CROPS_DISPLAY.keys())
@@ -475,16 +502,11 @@ with tab_nutrient:
             else:
                 st.success(f"Soil Status: Optimal / Moderately Alkaline (pH {soil_ph}) — Standard Indus plain range.")
 
-            diagnose_nut_btn = st.button(
+            diagnose_nut_btn = st.form_submit_button(
                 "🌾 Prescribe Fertilizer & Soil Fix",
                 width="stretch",
-                type="primary",
-                key="nut_submit_btn"
+                type="primary"
             )
-
-    with col_nut_out:
-        with st.container(border=True):
-            st.markdown("#### 📋 Expert Soil & Fertilizer Prescription")
 
             if diagnose_nut_btn:
                 wm_nut = WorkingMemory()
@@ -495,10 +517,26 @@ with tab_nutrient:
                     wm_nut.assert_fact("discoloration", leaf_discoloration)
 
                 t_start = time.perf_counter()
-                nut_result: InferenceResult = engine.evaluate(wm_nut, Category.NUTRIENT)
-                latency = (time.perf_counter() - t_start) * 1000
+                n_res: InferenceResult = engine.evaluate(wm_nut, Category.NUTRIENT)
+                n_lat = (time.perf_counter() - t_start) * 1000
+                n_exp = explainer.explain(n_res, wm_nut)
+                st.session_state["nut_result"] = {
+                    "result": n_res,
+                    "latency": n_lat,
+                    "explanation": n_exp,
+                    "soil_ph": soil_ph
+                }
 
-                nut_explanation = explainer.explain(nut_result, wm_nut)
+    with col_nut_out:
+        with st.container(border=True):
+            st.markdown("#### 📋 Expert Soil & Fertilizer Prescription")
+
+            if "nut_result" in st.session_state:
+                n_item = st.session_state["nut_result"]
+                nut_result: InferenceResult = n_item["result"]
+                latency = n_item["latency"]
+                nut_explanation = n_item["explanation"]
+                recorded_ph = n_item["soil_ph"]
 
                 if nut_result.success:
                     # Missing nutrient badge (as specified: st.info("Deficiency: ..."))
@@ -506,7 +544,7 @@ with tab_nutrient:
 
                     n1, n2, n3 = st.columns(3)
                     n1.metric("Certainty Score", f"{nut_result.confidence}%")
-                    n2.metric("Soil pH", f"{soil_ph}")
+                    n2.metric("Soil pH", f"{recorded_ph}")
                     n3.metric("Latency", f"{latency:.2f} ms")
 
                     # Prescribed NPK fertilizer dosage card
