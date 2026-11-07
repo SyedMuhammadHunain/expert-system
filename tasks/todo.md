@@ -69,11 +69,11 @@
 ## Task 5: Explanation & Limitations Facility
 **Description:** Implement `explanation_module.py` to produce human-readable reasoning traces, explain why a conclusion was reached, display certainty factor math, and detail system boundary limitations when symptoms do not match.
 **Acceptance criteria:**
-- [ ] Generates step-by-step reasoning trace from fired rules.
-- [ ] Explains why treatment/fertilizer was prescribed.
-- [ ] Formulates clear limitation notice when user inputs fall outside known rule database.
+- [x] Generates step-by-step reasoning trace from fired rules.
+- [x] Explains why treatment/fertilizer was prescribed.
+- [x] Formulates clear limitation notice when user inputs fall outside known rule database.
 **Verification:**
-- [ ] Unit test verifying trace generation on positive and negative inference outcomes.
+- [x] Unit test verifying trace generation on positive and negative inference outcomes.
 **Dependencies:** Tasks 3, 4
 **Files likely touched:**
 - `explanation_module.py`
