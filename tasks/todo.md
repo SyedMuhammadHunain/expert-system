@@ -40,10 +40,10 @@
 ## Task 3: Working Memory & State Management
 **Description:** Implement `working_memory.py` to maintain asserted user facts, active hypotheses, matched rules stack, and current query parameters per user session.
 **Acceptance criteria:**
-- [ ] Supports asserting facts, clearing memory, querying asserted facts, and logging rule firings.
-- [ ] Pure Python without external state dependencies.
+- [x] Supports asserting facts, clearing memory, querying asserted facts, and logging rule firings.
+- [x] Pure Python without external state dependencies.
 **Verification:**
-- [ ] Unit test creating working memory, asserting facts, and verifying query lookups.
+- [x] Unit test creating working memory, asserting facts, and verifying query lookups.
 **Dependencies:** Task 1
 **Files likely touched:**
 - `working_memory.py`
