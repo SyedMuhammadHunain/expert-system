@@ -42,8 +42,9 @@ Explanation Module (explanation_module.py)
 | **Explanation Facility** | Explains decisions & limitations | **Full step-by-step trace & boundary alerts** |
 | **Safety Guard** | Farm safety | **Pre-Harvest Interval (PHI) toxic chemical lockout** |
 | **Fault Tolerance** | No unhandled Python tracebacks | **Zero crashes on malformed/unmapped inputs** |
-| **Inference Latency** | < 1.0 second | **~0.012 ms** (Benchmarked) |
-| **UI Responsiveness** | < 500ms | **Instantaneous Streamlit reload** |
+| **Inference Latency** | < 1.0 second | **0.011 ms (p95: 0.015 ms)** across 10,000 runs |
+| **UI Responsiveness** | < 500ms | **24.73 ms (p95: 27.14 ms)** Streamlit rerun |
+| **Memory Peak** | Lightweight RAM | **0.32 KB** peak tracked memory |
 | **Public Deployment** | WAN accessible | **Streamlit Community Cloud ready** |
 
 ---
