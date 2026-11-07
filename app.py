@@ -237,11 +237,169 @@ with tab_disease:
 
 
 # ============================================================================
-# TAB 2: PEST IDENTIFICATION (Placeholder for Task 8)
+# TAB 2: PEST IDENTIFICATION & PRE-HARVEST SAFETY GUARD
 # ============================================================================
 with tab_pest:
-    st.subheader("Crop Pest Identification & Pre-Harvest Safety Guard")
-    st.caption("Module will be loaded in Task 8.")
+    st.subheader("Crop Pest Identification & Integrated Pest Management (IPM)")
+    st.info(
+        "Locate plant damage zone, observed feeding symptoms, and insect sightings. "
+        "The expert system enforces Pre-Harvest Interval (PHI) safety by blocking toxic insecticides if harvest is imminent.",
+        icon=":material/pest_control:"
+    )
+
+    col_pest_in, col_pest_out = st.columns([1, 1], gap="medium")
+
+    with col_pest_in:
+        with st.container(border=True):
+            st.markdown("#### 🐛 Pest Observation Form")
+            pest_crop_key = st.selectbox(
+                "Select Crop (فصل)",
+                options=list(CROPS_DISPLAY.keys()),
+                format_func=lambda k: CROPS_DISPLAY[k],
+                key="pest_crop_select"
+            )
+
+            plant_zone = st.selectbox(
+                "Target Plant Zone (نقصان کا حصہ)",
+                options=["leaves", "stems", "roots", "fruit"],
+                format_func=lambda z: {
+                    "leaves": "🍃 Leaves (پتے)",
+                    "stems": "🎋 Stems / Tillers (تنے)",
+                    "roots": "🌱 Roots / Underground (جڑیں)",
+                    "fruit": "🌾 Fruit / Bolls / Ears / Cobs (پھل / پھٹی / سٹے / چھلی)"
+                }.get(z, z.title()),
+                key="pest_zone_select"
+            )
+
+            visible_damage_list = st.multiselect(
+                "Visible Damage Checklist (نقصان کی علامات)",
+                options=[
+                    "chewed_leaf_margins",
+                    "fine_silky_webbing",
+                    "sticky_honeydew",
+                    "bore_holes",
+                    "dry_wilted_plants"
+                ],
+                format_func=lambda d: {
+                    "chewed_leaf_margins": "Chewed leaf margins / shot-holes (کترے ہوئے پتے)",
+                    "fine_silky_webbing": "Fine silky webbing under leaves (باریک جالا)",
+                    "sticky_honeydew": "Sticky honeydew with black sooty mold (چپچپا مواد)",
+                    "bore_holes": "Bore holes with frass / sawdust (سوراخ اور فضلے کے ذرات)",
+                    "dry_wilted_plants": "Dry, wilted or dead hearts (خشک سوکھے ہوئے پودے)"
+                }.get(d, d.replace("_", " ").title()),
+                key="pest_damage_multiselect"
+            )
+
+            pest_sighting = st.radio(
+                "Pest Sightings (دیکھا گیا کیڑا)",
+                options=[
+                    "none_seen",
+                    "tiny_green_insects",
+                    "white_flying_flies",
+                    "caterpillars",
+                    "white_waxy_clusters",
+                    "tiny_brown_hoppers",
+                    "jumping_leafhoppers",
+                    "tiny_red_mites"
+                ],
+                format_func=lambda s: {
+                    "none_seen": "None seen directly (کوئی نظر نہیں آیا)",
+                    "tiny_green_insects": "Tiny soft green insects (چھوٹا سبز کیڑا / تیلہ)",
+                    "white_flying_flies": "White flying flies (سفید مکھی)",
+                    "caterpillars": "Caterpillars / Larvae / Worms (سنڈیاں / کیڑے)",
+                    "white_waxy_clusters": "White waxy clusters on stems (سفید گدی دار کیڑا)",
+                    "tiny_brown_hoppers": "Tiny brown hoppers near base (بھورا تیلا)",
+                    "jumping_leafhoppers": "Active jumping leafhoppers (پتے کا ٹڈا)",
+                    "tiny_red_mites": "Tiny reddish moving specks / mites (سرخ مکڑی)"
+                }.get(s, s.replace("_", " ").title()),
+                key="pest_sighting_radio"
+            )
+
+            st.markdown("---")
+            near_harvest_val = st.toggle(
+                "🚨 Harvest is Close (< 14 - 21 Days to Harvest)",
+                help="Activating this triggers the Pre-Harvest Interval (PHI) safety guard, blocking hazardous chemicals to protect human food safety.",
+                key="pest_harvest_toggle"
+            )
+
+            diagnose_pest_btn = st.button(
+                "🛡️ Identify Pest & Get Solutions",
+                width="stretch",
+                type="primary",
+                key="pest_submit_btn"
+            )
+
+    with col_pest_out:
+        with st.container(border=True):
+            st.markdown("#### 🔍 Pest Identification & IPM Advisory")
+
+            if diagnose_pest_btn:
+                if not visible_damage_list and pest_sighting == "none_seen":
+                    st.warning("⚠️ Please select visible plant damage signs or observed insect sightings.")
+                else:
+                    wm_pest = WorkingMemory()
+                    wm_pest.assert_fact("crop", pest_crop_key)
+                    wm_pest.assert_fact("plant_zone", plant_zone)
+                    if visible_damage_list:
+                        wm_pest.assert_fact("damage", visible_damage_list)
+                    if pest_sighting != "none_seen":
+                        wm_pest.assert_fact("sightings", pest_sighting)
+                    if near_harvest_val:
+                        wm_pest.assert_fact("near_harvest", True)
+
+                    t_start = time.perf_counter()
+                    pest_result: InferenceResult = engine.evaluate(wm_pest, Category.PEST)
+                    latency = (time.perf_counter() - t_start) * 1000
+
+                    pest_explanation = explainer.explain(pest_result, wm_pest)
+
+                    if pest_result.success:
+                        st.success(f"### {pest_result.diagnosis}")
+
+                        p1, p2, p3 = st.columns(3)
+                        p1.metric("Certainty Score", f"{pest_result.confidence}%")
+                        p2.metric("Severity Tier", pest_result.details.get("severity_tier", "Moderate"))
+                        p3.metric("Latency", f"{latency:.2f} ms")
+
+                        # Pre-Harvest Lockout Warning Callout
+                        if pest_result.chemical_blocked:
+                            st.error(
+                                "🚨 **PRE-HARVEST SAFETY LOCKOUT TRIGGERED:**\n\n"
+                                "Crop harvest is imminent. Synthetic chemical sprays are **STRICTLY BLOCKED** "
+                                "to avoid toxic pesticide residue in grains and fiber. Only non-toxic biological "
+                                "and cultural controls are permitted.",
+                                icon=":material/gavel:"
+                            )
+
+                        # Biological Controls Column vs Chemical Insecticides
+                        st.markdown("##### 🐞 Biological & Cultural Controls:")
+                        bio_remedies = [r for r in pest_result.remedies if "BLOCKED" not in r and "SAFETY WARNING" not in r and "EC" not in r and "SC" not in r and "SL" not in r and "WG" not in r and "4G" not in r and "3G" not in r]
+                        for b in bio_remedies:
+                            st.markdown(f"- {b}")
+
+                        if not pest_result.chemical_blocked:
+                            st.markdown("##### 🧪 Chemical Insecticide Options (Apply with protective gear):")
+                            chem_remedies = [r for r in pest_result.remedies if r not in bio_remedies]
+                            for c in chem_remedies:
+                                st.markdown(f"- {c}")
+
+                        with st.expander("🔎 View Expert Decision Trail & IPM Reasoning"):
+                            for s in pest_explanation.get("steps", []):
+                                st.markdown(f"**{s['step']}**: {s['detail']}")
+                            st.caption(f"System boundary: {pest_explanation.get('limitations')}")
+
+                    else:
+                        st.warning(f"### {pest_result.diagnosis}")
+                        st.markdown(
+                            "The observed pest signature does not match any recognized pest pattern in the database. "
+                            "Please inspect the field with your local extension agent."
+                        )
+                        with st.expander("🔎 System Boundary Limitation Audit"):
+                            for s in pest_explanation.get("steps", []):
+                                st.markdown(f"**{s['step']}**: {s['detail']}")
+            else:
+                st.caption("Provide pest observation signs on the left and click **Identify Pest & Get Solutions**.")
+
 
 
 # ============================================================================

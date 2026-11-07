@@ -120,10 +120,10 @@
 ## Task 8: Streamlit UI - Pest Management Tab with Pre-Harvest Guard
 **Description:** Build Tab 2 in `app.py`: Plant zone selectbox, visible damage signs multiselect, pest sightings radio, harvest proximity toggle, and output card displaying pest species, severity tier, biological controls vs chemical insecticides, with chemical lockout when harvest is close.
 **Acceptance criteria:**
-- [ ] Matches all Tab 2 specifications in `expert-system.md`.
-- [ ] Blocks toxic chemicals with a warning card when harvest is imminent.
+- [x] Matches all Tab 2 specifications in `expert-system.md`.
+- [x] Blocks toxic chemicals with a warning card when harvest is imminent.
 **Verification:**
-- [ ] Interactive / programmatic validation of pre-harvest safety guard.
+- [x] Interactive / programmatic validation of pre-harvest safety guard.
 **Dependencies:** Tasks 4, 5
 **Files likely touched:**
 - `app.py`
