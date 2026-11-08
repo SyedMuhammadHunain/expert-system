@@ -43,11 +43,11 @@
 ## Task 3: Improve Readability & Accessibility (WCAG 2.1 AA)
 **Description:** Enhance visual hierarchy, typography, contrast, and form semantics. Improve helper descriptions, add structured tables/cards for diagnostic outputs, ensure field labels have descriptive help popovers, and optimize color contrast across alert containers (`st.info`, `st.success`, `st.warning`, `st.error`).
 **Acceptance criteria:**
-- [ ] Semantic heading structure (`h1` -> `h2` -> `h3` -> `h4`) throughout.
-- [ ] Input widgets feature explicit `help` parameters explaining expected observations to assist screen readers and field users.
-- [ ] Prescriptions and chemical lockout warnings use high-contrast, structured callouts with clear visual hierarchy.
+- [x] Semantic heading structure (`h1` -> `h2` -> `h3` -> `h4`) throughout.
+- [x] Input widgets feature explicit `help` parameters explaining expected observations to assist screen readers and field users.
+- [x] Prescriptions and chemical lockout warnings use high-contrast, structured callouts with clear visual hierarchy.
 **Verification:**
-- [ ] Headless UI tests in `tests/test_ui.py` verify all components render cleanly without exceptions.
+- [x] Headless UI tests in `tests/test_ui.py` verify all components render cleanly without exceptions.
 **Dependencies:** Tasks 1, 2
 **Files likely touched:**
 - `app.py`

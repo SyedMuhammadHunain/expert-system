@@ -43,10 +43,10 @@ def render_modality_badge(rule_type: str, confidence: float) -> None:
 
 
 def render_explanation_expander(
-    explanation: Dict[str, Any], title: str = "View Expert Decision Trail & Reasoning"
+    explanation: Dict[str, Any], title: str = "View expert decision trail and reasoning"
 ) -> None:
     """Render reasoning steps and system boundary limitations."""
-    with st.expander(title):
+    with st.expander(title, icon=":material/visibility:"):
         for s in explanation.get("steps", []):
             st.markdown(f"**{s['step']}**: {s['detail']}")
         if limits := explanation.get("limitations"):
@@ -118,27 +118,27 @@ st.caption(
 
 # Sidebar System Health & Architecture Info
 with st.sidebar:
-    st.header("Expert System Information")
-    st.success("Engine Status: Online & Certified")
-    st.metric(label="Loaded Rules", value=len(RULES), delta="Exceeds 50 required")
-    st.metric(label="Targeted Crops", value=5, delta="Pakistani Major Crops")
-    st.markdown("---")
-    st.subheader("System Architecture")
+    st.header("Expert system information")
+    st.success("Engine status: Certified operational", icon=":material/check_circle:")
+    st.metric(label="Loaded rules", value=len(RULES), delta="Exceeds 50 required")
+    st.metric(label="Targeted crops", value=5, delta="Pakistani major crops")
+    st.divider()
+    st.subheader("System architecture")
     st.markdown(
-        "- **Inference:** Pure Python Forward-Chaining\n"
-        "- **Certainty Factors:** 0.0 - 1.0\n"
-        "- **Safety Guard:** Pre-Harvest Interval (PHI)\n"
-        "- **Audit Trail:** Working Memory Trace"
+        "- **Inference:** Pure Python forward-chaining\n"
+        "- **Certainty factors:** 0.0 to 1.0\n"
+        "- **Safety guard:** Pre-harvest interval (PHI)\n"
+        "- **Audit trail:** Working memory trace"
     )
-    st.markdown("---")
-    st.caption("Developed for Academic CCP Viva & National Farmer Extension.")
+    st.divider()
+    st.caption("Developed for academic viva defense and agricultural extension.")
 
 
 # Tabs
 tab_disease, tab_pest, tab_nutrient = st.tabs([
-    "1. Crop Disease Diagnosis",
-    "2. Pest Identification & Safety Guard",
-    "3. Nutrient Deficiency & Fertilizer"
+    "1. Crop disease diagnosis",
+    "2. Pest identification and safety guard",
+    "3. Nutrient deficiency and fertilizer"
 ])
 
 
@@ -146,7 +146,7 @@ tab_disease, tab_pest, tab_nutrient = st.tabs([
 # TAB 1: DISEASE IDENTIFICATION
 # ============================================================================
 with tab_disease:
-    st.subheader("Crop Disease Identification & Management")
+    st.subheader("Crop disease identification and management")
     st.info(
         "Select your crop, observed foliage symptoms, and recent weather. "
         "The expert system matches symptoms against agronomic rule chains in < 1.0s.",
@@ -157,33 +157,37 @@ with tab_disease:
 
     with col_in:
         with st.form("disease_form", border=True):
-            st.markdown("#### Field Disease Observation Form")
+            st.markdown("#### Field disease observation form")
             selected_crop_key = st.selectbox(
-                "Select Crop",
+                "Select crop",
                 options=list(CROPS_DISPLAY.keys()),
                 format_func=lambda k: CROPS_DISPLAY[k],
+                help="Choose the primary crop currently showing foliar or ear abnormalities.",
                 key="dis_crop_select"
             )
 
             # Retrieve crop-specific symptoms
             available_symptoms = CROP_SYMPTOMS.get(selected_crop_key, {})
             selected_symptom_keys = st.multiselect(
-                "Select Observed Symptoms",
+                "Select observed symptoms",
                 options=list(available_symptoms.keys()),
                 format_func=lambda k: available_symptoms[k],
-                placeholder="Choose one or more observed leaf/ear signs...",
+                placeholder="Choose one or more observed leaf, stalk, or grain signs...",
+                help="Select all distinct visible lesion or tissue patterns present on the crop.",
                 key="dis_symptoms_select"
             )
 
             weather_choice = st.radio(
-                "Current / Recent Field Weather Conditions",
+                "Current or recent field weather conditions",
                 options=list(WEATHER_CONDITIONS.keys()),
                 format_func=lambda k: WEATHER_CONDITIONS[k],
+                help="Microclimate conditions like high humidity and dew accelerate specific fungal pathogens.",
                 key="dis_weather_radio"
             )
 
             diagnose_disease_btn = st.form_submit_button(
-                "Diagnose Disease",
+                "Diagnose disease",
+                icon=":material/biotech:",
                 width="stretch",
                 type="primary"
             )
@@ -215,10 +219,10 @@ with tab_disease:
 
     with col_out:
         with st.container(border=True):
-            st.markdown("#### Expert System Diagnostic Report")
+            st.markdown("#### Expert diagnostic report")
 
             if st.session_state.get("dis_error"):
-                st.warning(f"{st.session_state['dis_error']}")
+                st.warning(f"{st.session_state['dis_error']}", icon=":material/warning:")
             elif "dis_result" in st.session_state:
                 item = st.session_state["dis_result"]
                 result: InferenceResult = item["result"]
@@ -226,11 +230,11 @@ with tab_disease:
                 explanation = item["explanation"]
 
                 if result.success:
-                    st.success(f"### {result.diagnosis}")
+                    st.success(f"### {result.diagnosis}", icon=":material/check_circle:")
 
                     # Metrics row
                     m1, m2, m3 = st.columns(3)
-                    m1.metric("Certainty Score", f"{result.confidence}%")
+                    m1.metric("Certainty score", f"{result.confidence}%")
                     m2.metric("Severity", result.details.get("severity", "Moderate"))
                     m3.metric("Latency", f"{latency:.2f} ms")
 
@@ -238,32 +242,32 @@ with tab_disease:
                     render_modality_badge(result.details.get("rule_type", "hardcoded"), result.confidence)
 
                     # Treatment Remedies
-                    st.markdown("##### Prescribed Remedies & Solutions:")
+                    st.markdown("##### Prescribed remedies and agronomic treatments:")
                     for idx, remedy in enumerate(result.remedies, 1):
                         st.markdown(f"**{idx}.** {remedy}")
 
                     render_explanation_expander(explanation)
 
                 else:
-                    st.warning(f"### {result.diagnosis}")
+                    st.warning(f"### {result.diagnosis}", icon=":material/help:")
                     st.markdown(
                         "The expert system could not match these specific symptoms with high confidence. "
                         "To protect crop health, the system avoids speculative guessing."
                     )
-                    st.markdown("##### Recommended Next Actions:")
+                    st.markdown("##### Recommended next actions:")
                     for idx, rem in enumerate(result.remedies, 1):
                         st.markdown(f"**{idx}.** {rem}")
 
-                    render_explanation_expander(explanation, title="System Boundary Limitation Audit")
+                    render_explanation_expander(explanation, title="System boundary limitation audit")
             else:
-                st.caption("Select crop symptoms on the left and click **Diagnose Disease** to view findings.")
+                st.caption("Select crop symptoms on the left and click **Diagnose disease** to view findings.")
 
 
 # ============================================================================
 # TAB 2: PEST IDENTIFICATION & PRE-HARVEST SAFETY GUARD
 # ============================================================================
 with tab_pest:
-    st.subheader("Crop Pest Identification & Integrated Pest Management (IPM)")
+    st.subheader("Crop pest identification and integrated pest management (IPM)")
     st.info(
         "Locate plant damage zone, observed feeding symptoms, and insect sightings. "
         "The expert system enforces Pre-Harvest Interval (PHI) safety by blocking toxic insecticides if harvest is imminent.",
@@ -274,16 +278,17 @@ with tab_pest:
 
     with col_pest_in:
         with st.form("pest_form", border=True):
-            st.markdown("#### Pest Observation Form")
+            st.markdown("#### Pest observation form")
             pest_crop_key = st.selectbox(
-                "Select Crop",
+                "Select crop",
                 options=list(CROPS_DISPLAY.keys()),
                 format_func=lambda k: CROPS_DISPLAY[k],
+                help="Select the host crop experiencing pest feeding or infestation.",
                 key="pest_crop_select"
             )
 
             plant_zone = st.selectbox(
-                "Target Plant Zone",
+                "Target plant zone",
                 options=["leaves", "stems", "roots", "fruit"],
                 format_func=lambda z: {
                     "leaves": "Leaves",
@@ -291,11 +296,12 @@ with tab_pest:
                     "roots": "Roots / Underground",
                     "fruit": "Fruit / Bolls / Ears / Cobs"
                 }.get(z, z.title()),
+                help="Specify the primary plant organ or anatomical structure affected by pests.",
                 key="pest_zone_select"
             )
 
             visible_damage_list = st.multiselect(
-                "Visible Damage Checklist",
+                "Visible damage checklist",
                 options=[
                     "chewed_leaf_margins",
                     "fine_silky_webbing",
@@ -310,11 +316,13 @@ with tab_pest:
                     "bore_holes": "Bore holes with frass / sawdust",
                     "dry_wilted_plants": "Dry, wilted or dead hearts"
                 }.get(d, d.replace("_", " ").title()),
+                placeholder="Select one or more observable physical crop damages...",
+                help="Check all symptoms of physical feeding or excretion visible in the field.",
                 key="pest_damage_multiselect"
             )
 
             pest_sighting = st.radio(
-                "Pest Sightings",
+                "Observed insect pest sightings",
                 options=[
                     "none_seen",
                     "tiny_green_insects",
@@ -335,18 +343,20 @@ with tab_pest:
                     "jumping_leafhoppers": "Active jumping leafhoppers (Jassids)",
                     "tiny_red_mites": "Tiny reddish moving specks / mites"
                 }.get(s, s.replace("_", " ").title()),
+                help="Direct visual observation of the pest or its larval/nymph stages.",
                 key="pest_sighting_radio"
             )
 
-            st.markdown("---")
+            st.divider()
             near_harvest_val = st.toggle(
-                "Harvest is Close (< 14 - 21 Days to Harvest)",
+                "Harvest is close (< 14 - 21 days to harvest)",
                 help="Activating this triggers the Pre-Harvest Interval (PHI) safety guard, blocking hazardous chemicals to protect human food safety.",
                 key="pest_harvest_toggle"
             )
 
             diagnose_pest_btn = st.form_submit_button(
-                "Identify Pest & Get Solutions",
+                "Identify pest and retrieve IPM advisory",
+                icon=":material/security:",
                 width="stretch",
                 type="primary"
             )
@@ -379,10 +389,10 @@ with tab_pest:
 
     with col_pest_out:
         with st.container(border=True):
-            st.markdown("#### Pest Identification & IPM Advisory")
+            st.markdown("#### Pest identification and IPM advisory")
 
             if st.session_state.get("pest_error"):
-                st.warning(f"{st.session_state['pest_error']}")
+                st.warning(f"{st.session_state['pest_error']}", icon=":material/warning:")
             elif "pest_result" in st.session_state:
                 p_item = st.session_state["pest_result"]
                 pest_result: InferenceResult = p_item["result"]
@@ -390,46 +400,46 @@ with tab_pest:
                 pest_explanation = p_item["explanation"]
 
                 if pest_result.success:
-                    st.success(f"### {pest_result.diagnosis}")
+                    st.success(f"### {pest_result.diagnosis}", icon=":material/check_circle:")
 
                     p1, p2, p3 = st.columns(3)
-                    p1.metric("Certainty Score", f"{pest_result.confidence}%")
-                    p2.metric("Severity Tier", pest_result.details.get("severity_tier", "Moderate"))
+                    p1.metric("Certainty score", f"{pest_result.confidence}%")
+                    p2.metric("Severity tier", pest_result.details.get("severity_tier", "Moderate"))
                     p3.metric("Latency", f"{latency:.2f} ms")
 
                     # Pre-Harvest Lockout Warning Callout
                     if pest_result.chemical_blocked:
                         st.error(
                             "**PRE-HARVEST SAFETY LOCKOUT TRIGGERED:**\n\n"
-                            "Crop harvest is imminent. Synthetic chemical sprays are **STRICTLY BLOCKED** "
+                            "Crop harvest is imminent. Synthetic chemical sprays are **strictly blocked** "
                             "to avoid toxic pesticide residue in grains and fiber. Only non-toxic biological "
                             "and cultural controls are permitted.",
                             icon=":material/gavel:"
                         )
 
                     # Biological Controls Column vs Chemical Insecticides
-                    st.markdown("##### Biological & Cultural Controls:")
+                    st.markdown("##### Biological and cultural controls:")
                     bio_remedies = [r for r in pest_result.remedies if "BLOCKED" not in r and "SAFETY WARNING" not in r and "EC" not in r and "SC" not in r and "SL" not in r and "WG" not in r and "4G" not in r and "3G" not in r]
                     for b in bio_remedies:
                         st.markdown(f"- {b}")
 
                     if not pest_result.chemical_blocked:
-                        st.markdown("##### Chemical Insecticide Options (Apply with protective gear):")
+                        st.markdown("##### Chemical insecticide options (Apply with certified PPE):")
                         chem_remedies = [r for r in pest_result.remedies if r not in bio_remedies]
                         for c in chem_remedies:
                             st.markdown(f"- {c}")
 
-                    render_explanation_expander(pest_explanation, title="View Expert Decision Trail & IPM Reasoning")
+                    render_explanation_expander(pest_explanation, title="View expert decision trail and IPM reasoning")
 
                 else:
-                    st.warning(f"### {pest_result.diagnosis}")
+                    st.warning(f"### {pest_result.diagnosis}", icon=":material/help:")
                     st.markdown(
                         "The observed pest signature does not match any recognized pest pattern in the database. "
                         "Please inspect the field with your local extension agent."
                     )
-                    render_explanation_expander(pest_explanation, title="System Boundary Limitation Audit")
+                    render_explanation_expander(pest_explanation, title="System boundary limitation audit")
             else:
-                st.caption("Provide pest observation signs on the left and click **Identify Pest & Get Solutions**.")
+                st.caption("Provide pest observation signs on the left and click **Identify pest and retrieve IPM advisory**.")
 
 
 
@@ -437,7 +447,7 @@ with tab_pest:
 # TAB 3: NUTRIENT DEFICIENCY & FERTILIZER PRESCRIPTION
 # ============================================================================
 with tab_nutrient:
-    st.subheader("Nutrient Deficiency Identification & Fertilizer Prescription")
+    st.subheader("Nutrient deficiency identification and fertilizer prescription")
     st.info(
         "Analyze leaf discoloration patterns, crop growth stage, and soil pH to calculate exact "
         "NPK fertilizer dosages (Urea, DAP, SOP) and soil chemical remediation (Lime / Gypsum).",
@@ -448,29 +458,31 @@ with tab_nutrient:
 
     with col_nut_in:
         with st.form("nutrient_form", border=True):
-            st.markdown("#### Soil & Foliage Input Form")
+            st.markdown("#### Soil and foliage input form")
 
             nut_crop_options = ["all"] + list(CROPS_DISPLAY.keys())
             nut_crop_key = st.selectbox(
-                "Target Crop",
+                "Target crop",
                 options=nut_crop_options,
-                format_func=lambda k: "All Crops / Universal Soil Check" if k == "all" else CROPS_DISPLAY[k],
+                format_func=lambda k: "All crops / universal soil check" if k == "all" else CROPS_DISPLAY[k],
+                help="Select target crop or choose universal check for general soil pH guidance.",
                 key="nut_crop_select"
             )
 
             crop_stage = st.selectbox(
-                "Crop Growth Stage",
+                "Crop growth stage",
                 options=["vegetative", "flowering", "fruiting"],
                 format_func=lambda s: {
-                    "vegetative": "Vegetative / Tillering Stage",
-                    "flowering": "Flowering / Boot Stage",
-                    "fruiting": "Fruiting / Boll-fill / Grain Formation"
+                    "vegetative": "Vegetative / tillering stage",
+                    "flowering": "Flowering / boot stage",
+                    "fruiting": "Fruiting / boll-fill / grain formation"
                 }.get(s, s.title()),
+                help="Plant phenological stage dictates specific nutrient uptake demands.",
                 key="nut_stage_select"
             )
 
             leaf_discoloration = st.selectbox(
-                "Leaf Discoloration Map",
+                "Leaf discoloration map",
                 options=[
                     "none",
                     "lower_leaves_yellowing",
@@ -485,29 +497,31 @@ with tab_nutrient:
                     "purple_leaf_undersides": "Purple leaf undersides / anthocyanin (Phosphorus deficit)",
                     "interveinal_chlorosis": "Interveinal chlorosis / bleached bands (Zinc/Iron deficit)"
                 }.get(d, d.replace("_", " ").title()),
+                help="Characteristic visual chlorosis patterns corresponding to mobility of nutrients.",
                 key="nut_discoloration_select"
             )
 
             soil_ph = st.slider(
-                "Measured Soil pH",
+                "Measured soil pH",
                 min_value=4.5,
                 max_value=8.5,
                 value=7.8,
                 step=0.1,
-                help="Typical Pakistani Indus Basin soils are alkaline (pH 7.8 - 8.5). Acidic soils (< 6.0) require agricultural lime.",
+                help="Typical Indus Basin soils are alkaline (pH 7.8 - 8.5). Acidic soils (< 6.0) require agricultural lime; sodic soils (> 8.2) require gypsum.",
                 key="nut_ph_slider"
             )
 
             # Interactive Soil pH Indicator
             if soil_ph < 5.5:
-                st.error(f"Soil Status: Strongly Acidic (pH {soil_ph}) — High risk of Al/Mn toxicity.")
+                st.error(f"Soil status: Strongly acidic (pH {soil_ph}) — High risk of Al/Mn toxicity.", icon=":material/report:")
             elif soil_ph > 8.2:
-                st.warning(f"Soil Status: Strongly Alkaline / Sodic (pH {soil_ph}) — Zn/Fe micronutrients locked.")
+                st.warning(f"Soil status: Strongly alkaline / sodic (pH {soil_ph}) — Micronutrients locked.", icon=":material/warning:")
             else:
-                st.success(f"Soil Status: Optimal / Moderately Alkaline (pH {soil_ph}) — Standard Indus plain range.")
+                st.success(f"Soil status: Optimal / moderately alkaline (pH {soil_ph}) — Standard Indus plain range.", icon=":material/check_circle:")
 
             diagnose_nut_btn = st.form_submit_button(
-                "Prescribe Fertilizer & Soil Fix",
+                "Prescribe fertilizer and soil remediation",
+                icon=":material/science:",
                 width="stretch",
                 type="primary"
             )
@@ -533,7 +547,7 @@ with tab_nutrient:
 
     with col_nut_out:
         with st.container(border=True):
-            st.markdown("#### Expert Soil & Fertilizer Prescription")
+            st.markdown("#### Expert soil and fertilizer prescription")
 
             if "nut_result" in st.session_state:
                 n_item = st.session_state["nut_result"]
@@ -544,15 +558,15 @@ with tab_nutrient:
 
                 if nut_result.success:
                     # Missing nutrient badge (as specified: st.info("Deficiency: ..."))
-                    st.info(f"### Deficiency Identified: {nut_result.diagnosis}", icon=":material/science:")
+                    st.info(f"### Deficiency identified: {nut_result.diagnosis}", icon=":material/science:")
 
                     n1, n2, n3 = st.columns(3)
-                    n1.metric("Certainty Score", f"{nut_result.confidence}%")
+                    n1.metric("Certainty score", f"{nut_result.confidence}%")
                     n2.metric("Soil pH", f"{recorded_ph}")
                     n3.metric("Latency", f"{latency:.2f} ms")
 
                     # Prescribed NPK fertilizer dosage card
-                    st.markdown("##### Prescribed NPK & Soil Remediation Card:")
+                    st.markdown("##### Prescribed NPK and soil remediation schedule:")
                     for idx, rem in enumerate(nut_result.remedies, 1):
                         st.markdown(f"- **{rem}**")
 
@@ -560,15 +574,15 @@ with tab_nutrient:
                     timeline_val = nut_result.details.get("recovery_timeline", "7-14 days")
                     st.caption(f"**Expected foliage recovery timeline:** {timeline_val}")
 
-                    render_explanation_expander(nut_explanation, title="View Expert Decision Trail & Soil Chemistry Reasoning")
+                    render_explanation_expander(nut_explanation, title="View expert decision trail and soil chemistry reasoning")
 
                 else:
-                    st.warning(f"### {nut_result.diagnosis}")
+                    st.warning(f"### {nut_result.diagnosis}", icon=":material/help:")
                     st.markdown(
                         "No acute nutrient deficit was detected for the provided combination. "
                         "Maintain standard NPK basal application for this crop."
                     )
-                    render_explanation_expander(nut_explanation, title="System Boundary Limitation Audit")
+                    render_explanation_expander(nut_explanation, title="System boundary limitation audit")
             else:
-                st.caption("Adjust foliage discoloration, growth stage, and soil pH, then click **Prescribe Fertilizer & Soil Fix**.")
+                st.caption("Adjust foliage discoloration, growth stage, and soil pH, then click **Prescribe fertilizer and soil remediation**.")
 
