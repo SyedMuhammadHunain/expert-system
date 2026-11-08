@@ -1,75 +1,57 @@
-# Tasks: Partial-Matching Fallback & Single-Symptom Resolution
+# Tasks: Dynamic Crop Option Reactivity Across All Tabs
 
-## Task 1: Complete Partial-Matching Scoring in Inference Engine
-**Description:** Ensure `_partial_match_score` in `inference_engine.py` handles all condition keys correctly (`symptoms`, `weather`, `plant_zone`, `damage`, `sightings`, `discoloration`, `stage`, `ph_min`, `ph_max`). Return proportional match ratio and captured conditions.
+## Task 1: Refactor Tab 1 (Disease) to Reactive Container
+**Description:** Replace `with st.form("disease_form", border=True):` with `with st.container(border=True):` in `app.py`. Change `st.form_submit_button` to `st.button`. Clear previous symptom selections and diagnostic outputs when a new crop is chosen so symptom options immediately reflect the selected crop.
 **Acceptance criteria:**
-- [x] Disease rules with 2+ conditions fire as partial matches when 1 symptom is asserted.
-- [x] Pest rules fire as partial matches when only plant zone and 1 damage sign or 1 sighting is asserted.
-- [x] Nutrient rules fire as partial matches when only discoloration is asserted without specific pH.
-- [x] Partial CF is scaled proportionally and hard-capped at 0.50 (50%).
+- [x] Selecting a crop in Tab 1 immediately triggers a rerun and updates the symptom multiselect options to match that crop.
+- [x] Switching crops clears previous crop symptom selections.
+- [x] "Diagnose disease" button remains the trigger for running the inference engine.
 **Verification:**
-- [x] `pytest tests/test_rules.py` passes with dedicated partial matching assertions.
+- [x] Python test confirms selecting a different crop alters `dis_symptoms_select` options.
 **Dependencies:** None
-**Files likely touched:**
-- `inference_engine.py`
-- `tests/test_rules.py`
-**Estimated scope:** Small (2 files)
-
----
-
-## Task 2: Refine Explanation Trace & Boundary Explanations
-**Description:** Enhance `ExplanationTrace` generation for partial matches so the user sees which conditions matched, which conditions were missing, and specific next observational steps.
-**Acceptance criteria:**
-- [x] Trace includes an explicit limitation notice for partial matches.
-- [x] Diagnosis string appends `(Possible)` to prevent overconfidence.
-- [x] `remedies` are preserved and include advice to inspect missing symptoms.
-**Verification:**
-- [x] Unit tests verify `res.limitation_notice` is populated on partial match.
-**Dependencies:** Task 1
-**Files likely touched:**
-- `inference_engine.py`
-- `tests/test_rules.py`
-**Estimated scope:** Small (2 files)
-
----
-
-## Checkpoint 1: Engine Logic Verification
-- [ ] Unit tests pass: `pytest -v tests/test_rules.py`
-- [ ] Latency remains < 10ms
-
----
-
-## Task 3: Update Streamlit UI for Partial Confidence Feedback
-**Description:** Update `app.py` diagnostic cards (Disease, Pest, and Nutrient tabs) to render a distinct status banner (`st.warning` with informative caption) when `result.limitation_notice` indicates a partial match.
-**Acceptance criteria:**
-- [x] Tab 1 (Disease) shows an alert and guidance when a partial match is diagnosed.
-- [x] Tab 2 (Pest) handles partial pest matches cleanly with the pre-harvest safety guard intact.
-- [x] Tab 3 (Nutrient) displays partial deficiency suggestions when only discoloration is provided.
-**Verification:**
-- [x] Visual verification and test run in `tests/test_ui.py`.
-**Dependencies:** Task 1, 2
 **Files likely touched:**
 - `app.py`
 **Estimated scope:** Small (1 file)
 
 ---
 
-## Task 4: Add Automated UI Regression Tests for Single-Symptom Scenarios
-**Description:** Add headless Streamlit AppTests in `tests/test_ui.py` simulating a user selecting exactly 1 symptom with default weather across crops to guarantee no unexpected "Unknown Condition" failure.
+## Task 2: Refactor Tab 2 (Pest) and Tab 3 (Nutrient) to Reactive Containers
+**Description:** Replace `st.form("pest_form")` and `st.form("nutrient_form")` with `st.container(border=True)` and standard `st.button`. Reset previous diagnostic results and dependent inputs when the target crop changes.
 **Acceptance criteria:**
-- [x] AppTest simulates single-symptom selection (e.g., wheat `yellow_pustules_stripes` without cool_humid weather) and asserts valid diagnosis is rendered.
-- [x] AppTest tests pest tab with only 1 visible damage selected.
-- [x] All 32 tests pass cleanly.
+- [ ] Tab 2 (Pest) switches reactively without requiring hard refresh; changing crop resets previous results and checklist selections.
+- [ ] Tab 3 (Nutrient) switches reactively; target crop change updates recommendation context immediately.
+- [ ] Action buttons `Identify pest and retrieve IPM advisory` and `Prescribe fertilizer and soil remediation` execute cleanly as standard buttons.
 **Verification:**
-- [x] `pytest -v tests/` completes in < 3s with 100% passing tests.
-**Dependencies:** Task 3
+- [ ] `pytest tests/test_ui.py` passes all existing test cases.
+**Dependencies:** Task 1
+**Files likely touched:**
+- `app.py`
+**Estimated scope:** Small (1 file)
+
+---
+
+## Checkpoint 1: Reactive Container Migration
+- [ ] Tab 1, 2, and 3 use `st.container(border=True)` instead of `st.form`.
+- [ ] All 32 automated tests pass (`pytest -v tests/`).
+
+---
+
+## Task 3: Add Automated Headless AppTests for Dynamic Crop Switching
+**Description:** In `tests/test_ui.py`, add dedicated `AppTest` test cases that programmatically switch `dis_crop_select` from Wheat to Cotton, Maize, Rice, Sugarcane and verify that the symptom options in `dis_symptoms_select` update dynamically to the correct crop's symptoms without hard refresh.
+**Acceptance criteria:**
+- [ ] Headless test confirms `dis_symptoms_select` options switch from Wheat to Cotton after selectbox change.
+- [ ] Test confirms selecting Cotton symptom and clicking diagnose produces CLCuV or Bacterial Blight result.
+- [ ] Full test suite passes in < 3s.
+**Verification:**
+- [ ] `pytest -v tests/` 100% passing.
+**Dependencies:** Tasks 1, 2
 **Files likely touched:**
 - `tests/test_ui.py`
 **Estimated scope:** Small (1 file)
 
 ---
 
-## Checkpoint 2: Complete System Verification
-- [x] Full test suite green (`pytest -v tests/`)
-- [x] Single-symptom inputs reliably produce actionable advice
-- [x] Code committed and pushed to git
+## Checkpoint 2: Verification and Git Push
+- [ ] Test suite completely green.
+- [ ] Verify live Streamlit app running at `http://127.0.0.1:8501`.
+- [ ] Push atomic commits to GitHub `origin/main`.

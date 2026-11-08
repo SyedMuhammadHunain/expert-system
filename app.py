@@ -246,15 +246,21 @@ with tab_disease:
 
     col_in, col_out = st.columns([1, 1], gap="medium")
 
+    def _reset_disease_on_crop_change() -> None:
+        st.session_state.pop("dis_symptoms_select", None)
+        st.session_state.pop("dis_result", None)
+        st.session_state.pop("dis_error", None)
+
     with col_in:
-        with st.form("disease_form", border=True):
+        with st.container(border=True):
             st.markdown("#### Field disease observation form")
             selected_crop_key = st.selectbox(
                 "Select crop",
                 options=list(CROPS_DISPLAY.keys()),
                 format_func=lambda k: CROPS_DISPLAY[k],
                 help="Choose the primary crop currently showing foliar or ear abnormalities.",
-                key="dis_crop_select"
+                key="dis_crop_select",
+                on_change=_reset_disease_on_crop_change
             )
 
             # Retrieve crop-specific symptoms
@@ -276,7 +282,7 @@ with tab_disease:
                 key="dis_weather_radio"
             )
 
-            diagnose_disease_btn = st.form_submit_button(
+            diagnose_disease_btn = st.button(
                 "Diagnose disease",
                 icon=":material/biotech:",
                 width="stretch",
