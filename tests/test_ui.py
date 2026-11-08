@@ -94,3 +94,15 @@ def test_nutrient_tab_soil_acidity_fix():
     assert not at.exception
     info_texts = [i.value for i in at.info]
     assert any("Soil Acidity Fix" in i for i in info_texts)
+
+
+def test_visual_charts_render_cleanly():
+    at = AppTest.from_file("../app.py")
+    at.run(timeout=10)
+    assert not at.exception
+
+    # Execute Tab 3 inference and ensure Altair charts compile
+    at.slider("nut_ph_slider").set_value(7.8)
+    at.selectbox("nut_discoloration_select").select("lower_leaves_yellowing")
+    at.button[2].click().run(timeout=10)
+    assert not at.exception

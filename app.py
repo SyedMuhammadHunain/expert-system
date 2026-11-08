@@ -50,6 +50,74 @@ def render_confidence_meter(confidence: float) -> None:
     st.progress(val, text=f"Certainty factor: {confidence}% confidence score")
 
 
+def render_soil_ph_spectrum(current_ph: float) -> None:
+    """Render an Altair soil chemistry spectrum chart highlighting measured field pH."""
+    spectrum_data = [
+        {"Zone": "Acidic (Al/Mn Toxicity)", "Start": 4.5, "End": 6.0, "Color": "#d9534f"},
+        {"Zone": "Optimal Agronomic Range", "Start": 6.0, "End": 7.5, "Color": "#5cb85c"},
+        {"Zone": "Alkaline / Calcareous (Indus)", "Start": 7.5, "End": 8.5, "Color": "#0275d8"}
+    ]
+    df_spec = pd.DataFrame(spectrum_data)
+    zones = alt.Chart(df_spec).mark_bar(opacity=0.6).encode(
+        x=alt.X("Start:Q", scale=alt.Scale(domain=[4.5, 8.5]), title="Soil pH"),
+        x2="End:Q",
+        color=alt.Color(
+            "Zone:N",
+            scale=alt.Scale(
+                domain=[s["Zone"] for s in spectrum_data],
+                range=[s["Color"] for s in spectrum_data]
+            ),
+            legend=alt.Legend(orient="bottom", title=None)
+        )
+    ).properties(height=65)
+
+    marker_df = pd.DataFrame([{"ph": current_ph}])
+    marker = alt.Chart(marker_df).mark_rule(color="#111111", strokeWidth=3).encode(
+        x="ph:Q"
+    )
+
+    chart = (zones + marker)
+    st.altair_chart(chart, width="stretch", alt=f"Soil pH spectrum showing current measured pH at {current_ph}")
+
+
+def render_npk_dosage_chart(remedies: List[str], crop: str) -> None:
+    """Render NPK macronutrient application bar chart based on prescribed remedies."""
+    import re
+    fertilizers = []
+    for r in remedies:
+        kg_match = re.search(r"(\d+)\s*kg", r, re.IGNORECASE)
+        dosage = int(kg_match.group(1)) if kg_match else None
+
+        if "urea" in r.lower():
+            fertilizers.append({"Fertilizer": "Urea (46% N)", "Dosage (kg/acre)": dosage or 50, "Nutrient": "Nitrogen"})
+        elif "dap" in r.lower():
+            fertilizers.append({"Fertilizer": "DAP (18% N, 46% P)", "Dosage (kg/acre)": dosage or 50, "Nutrient": "Phosphorus"})
+        elif "sop" in r.lower() or "potassium" in r.lower():
+            fertilizers.append({"Fertilizer": "SOP / MOP (50% K)", "Dosage (kg/acre)": dosage or 25, "Nutrient": "Potassium"})
+        elif "zinc" in r.lower():
+            fertilizers.append({"Fertilizer": "Zinc Sulphate (33% Zn)", "Dosage (kg/acre)": dosage or 6, "Nutrient": "Zinc"})
+        elif "gypsum" in r.lower():
+            fertilizers.append({"Fertilizer": "Agricultural Gypsum", "Dosage (kg/acre)": dosage or 500, "Nutrient": "Calcium/Sulfur"})
+        elif "lime" in r.lower():
+            fertilizers.append({"Fertilizer": "Agricultural Lime", "Dosage (kg/acre)": dosage or 1000, "Nutrient": "Calcium"})
+
+    if fertilizers:
+        df_fert = pd.DataFrame(fertilizers)
+        chart_fert = (
+            alt.Chart(df_fert)
+            .mark_bar(cornerRadiusEnd=4)
+            .encode(
+                x=alt.X("Dosage (kg/acre):Q", title="Application Rate (kg / acre)"),
+                y=alt.Y("Fertilizer:N", sort="-x", title=None),
+                color=alt.Color("Nutrient:N", legend=None),
+                tooltip=["Fertilizer", "Nutrient", "Dosage (kg/acre)"]
+            )
+            .properties(height=max(100, len(fertilizers) * 32))
+        )
+        st.markdown("##### Prescribed application rates by product:")
+        st.altair_chart(chart_fert, width="stretch", alt="Prescribed fertilizer application rates in kg per acre")
+
+
 def render_explanation_expander(
     explanation: Dict[str, Any], title: str = "View expert decision trail and reasoning"
 ) -> None:
@@ -548,7 +616,9 @@ with tab_nutrient:
                 key="nut_ph_slider"
             )
 
-            # Interactive Soil pH Indicator
+            # Interactive Soil pH Indicator & Spectrum Chart
+            render_soil_ph_spectrum(soil_ph)
+
             if soil_ph < 5.5:
                 st.error(f"Soil status: Strongly acidic (pH {soil_ph}) — High risk of Al/Mn toxicity.", icon=":material/report:")
             elif soil_ph > 8.2:
@@ -606,6 +676,9 @@ with tab_nutrient:
                     st.markdown("##### Prescribed NPK and soil remediation schedule:")
                     for idx, rem in enumerate(nut_result.remedies, 1):
                         st.markdown(f"- **{rem}**")
+
+                    # NPK Application Rate Chart
+                    render_npk_dosage_chart(nut_result.remedies, nut_crop_key)
 
                     # Recovery timeline estimate (as specified: st.caption("Expected foliage recovery: ..."))
                     timeline_val = nut_result.details.get("recovery_timeline", "7-14 days")
