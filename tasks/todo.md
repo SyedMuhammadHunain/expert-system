@@ -1,57 +1,46 @@
-# Tasks: Dynamic Crop Option Reactivity Across All Tabs
+# Tasks: Generate Project Report Word Document (.docx)
 
-## Task 1: Refactor Tab 1 (Disease) to Reactive Container
-**Description:** Replace `with st.form("disease_form", border=True):` with `with st.container(border=True):` in `app.py`. Change `st.form_submit_button` to `st.button`. Clear previous symptom selections and diagnostic outputs when a new crop is chosen so symptom options immediately reflect the selected crop.
+## Task 1: Environment Setup
+**Description:** Install `python-docx` into the local virtual environment (`.venv`) so Python can programmatically build the `.docx` document.
 **Acceptance criteria:**
-- [x] Selecting a crop in Tab 1 immediately triggers a rerun and updates the symptom multiselect options to match that crop.
-- [x] Switching crops clears previous crop symptom selections.
-- [x] "Diagnose disease" button remains the trigger for running the inference engine.
+- [x] `python-docx` installed in `.venv`.
+- [x] `.venv/bin/python3 -c "import docx"` succeeds.
 **Verification:**
-- [x] Python test confirms selecting a different crop alters `dis_symptoms_select` options.
+- [x] Exit code 0 on python import test.
 **Dependencies:** None
-**Files likely touched:**
-- `app.py`
-**Estimated scope:** Small (1 file)
+**Files likely touched:** None
+**Estimated scope:** Small
 
 ---
 
-## Task 2: Refactor Tab 2 (Pest) and Tab 3 (Nutrient) to Reactive Containers
-**Description:** Replace `st.form("pest_form")` and `st.form("nutrient_form")` with `st.container(border=True)` and standard `st.button`. Reset previous diagnostic results and dependent inputs when the target crop changes.
+## Task 2: Build and Execute Report Generation Script
+**Description:** Create `scripts/generate_docx_report.py` to construct `Project_Report_Expert_System.docx` strictly fulfilling:
+1. Dotted Table of Contents with page references.
+2. Introduction: 1 simple paragraph.
+3. Problem Statement: Exactly 4 lines in one paragraph.
+4. Requirements:
+   - Subheading Functional Requirements: 2-column table (`Requirement` | `Description`) from `expert-system.md`.
+   - Subheading Non-Functional Requirements: 2-column table (`Requirement` | `Description`) from `expert-system.md`.
+5. High Level Design: Blank placeholder area.
+6. Code Explanation: Blank placeholder area.
+7. Results: Blank placeholder area.
+8. Summary: Exactly 5 lines in one paragraph.
+9. Format: Main headings Bold + Italic + Underlined; 100% black font, zero colors, zero table fills.
 **Acceptance criteria:**
-- [x] Tab 2 (Pest) switches reactively without requiring hard refresh; changing crop resets previous results and checklist selections.
-- [x] Tab 3 (Nutrient) switches reactively; target crop change updates recommendation context immediately.
-- [x] Action buttons `Identify pest and retrieve IPM advisory` and `Prescribe fertilizer and soil remediation` execute cleanly as standard buttons.
+- [ ] Document generated at `Project_Report_Expert_System.docx`.
+- [ ] All main headings are bold, italic, and underlined.
+- [ ] Tables use only black text and white cells (no blue, light blue, or colored shading).
+- [ ] Requirements extracted from `expert-system.md`.
 **Verification:**
-- [x] `pytest tests/test_ui.py` passes all existing test cases.
+- [ ] Python script runs cleanly and inspects generated docx structure.
 **Dependencies:** Task 1
 **Files likely touched:**
-- `app.py`
-**Estimated scope:** Small (1 file)
+- `scripts/generate_docx_report.py`
+- `Project_Report_Expert_System.docx`
+**Estimated scope:** Medium (1 script + 1 docx)
 
 ---
 
-## Checkpoint 1: Reactive Container Migration
-- [x] Tab 1, 2, and 3 use `st.container(border=True)` instead of `st.form`.
-- [x] All 32 automated tests pass (`pytest -v tests/`).
-
----
-
-## Task 3: Add Automated Headless AppTests for Dynamic Crop Switching
-**Description:** In `tests/test_ui.py`, add dedicated `AppTest` test cases that programmatically switch `dis_crop_select` from Wheat to Cotton, Maize, Rice, Sugarcane and verify that the symptom options in `dis_symptoms_select` update dynamically to the correct crop's symptoms without hard refresh.
-**Acceptance criteria:**
-- [x] Headless test confirms `dis_symptoms_select` options switch from Wheat to Cotton after selectbox change.
-- [x] Test confirms selecting Cotton symptom and clicking diagnose produces CLCuV or Bacterial Blight result.
-- [x] Full test suite passes in < 3s.
-**Verification:**
-- [x] `pytest -v tests/` 100% passing.
-**Dependencies:** Tasks 1, 2
-**Files likely touched:**
-- `tests/test_ui.py`
-**Estimated scope:** Small (1 file)
-
----
-
-## Checkpoint 2: Verification and Git Push
-- [x] Test suite completely green.
-- [x] Verify live Streamlit app running at `http://127.0.0.1:8501`.
-- [x] Push atomic commits to GitHub `origin/main`.
+## Checkpoint: Sign-off and Delivery
+- [ ] Document verified and confirmed on disk.
+- [ ] Ready for user editing and viva submission.
