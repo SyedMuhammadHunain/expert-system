@@ -42,11 +42,11 @@
 ## Task 3: Update Streamlit UI for Partial Confidence Feedback
 **Description:** Update `app.py` diagnostic cards (Disease, Pest, and Nutrient tabs) to render a distinct status banner (`st.warning` with informative caption) when `result.limitation_notice` indicates a partial match.
 **Acceptance criteria:**
-- [ ] Tab 1 (Disease) shows an alert and guidance when a partial match is diagnosed.
-- [ ] Tab 2 (Pest) handles partial pest matches cleanly with the pre-harvest safety guard intact.
-- [ ] Tab 3 (Nutrient) displays partial deficiency suggestions when only discoloration is provided.
+- [x] Tab 1 (Disease) shows an alert and guidance when a partial match is diagnosed.
+- [x] Tab 2 (Pest) handles partial pest matches cleanly with the pre-harvest safety guard intact.
+- [x] Tab 3 (Nutrient) displays partial deficiency suggestions when only discoloration is provided.
 **Verification:**
-- [ ] Visual verification and test run in `tests/test_ui.py`.
+- [x] Visual verification and test run in `tests/test_ui.py`.
 **Dependencies:** Task 1, 2
 **Files likely touched:**
 - `app.py`

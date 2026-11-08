@@ -36,7 +36,9 @@ engine, explainer = get_system_components()
 
 def render_modality_badge(rule_type: str, confidence: float) -> None:
     """Render informative badge explaining rule modality."""
-    if rule_type == "hardcoded":
+    if rule_type == "partial":
+        st.caption(f"**Rule modality:** Partial match ({confidence}% Certainty Factor — corroborating signs recommended)")
+    elif rule_type == "hardcoded":
         st.caption("**Rule modality:** Hardcoded deterministic (100% textbook match)")
     elif rule_type == "may_or_may_not":
         st.caption(f"**Rule modality:** Probabilistic inference ({confidence}% Certainty Factor)")
@@ -319,7 +321,11 @@ with tab_disease:
                 explanation = item["explanation"]
 
                 if result.success:
-                    st.success(f"### {result.diagnosis}", icon=":material/check_circle:")
+                    if result.limitation_notice:
+                        st.warning(f"### {result.diagnosis}", icon=":material/help:")
+                        st.caption(result.limitation_notice)
+                    else:
+                        st.success(f"### {result.diagnosis}", icon=":material/check_circle:")
 
                     # Metrics row
                     m1, m2, m3 = st.columns(3)
@@ -492,7 +498,11 @@ with tab_pest:
                 pest_explanation = p_item["explanation"]
 
                 if pest_result.success:
-                    st.success(f"### {pest_result.diagnosis}", icon=":material/check_circle:")
+                    if pest_result.limitation_notice:
+                        st.warning(f"### {pest_result.diagnosis}", icon=":material/help:")
+                        st.caption(pest_result.limitation_notice)
+                    else:
+                        st.success(f"### {pest_result.diagnosis}", icon=":material/check_circle:")
 
                     p1, p2, p3 = st.columns(3)
                     p1.metric("Certainty score", f"{pest_result.confidence}%")
@@ -501,6 +511,12 @@ with tab_pest:
 
                     # Certainty factor visual meter
                     render_confidence_meter(pest_result.confidence)
+
+                    # Rule Category Badge
+                    render_modality_badge(
+                        "partial" if pest_result.details.get("match_type") == "partial" else pest_result.details.get("rule_type", "hardcoded"),
+                        pest_result.confidence
+                    )
 
                     # Pre-Harvest Lockout Warning Callout
                     if pest_result.chemical_blocked:
@@ -654,13 +670,26 @@ with tab_nutrient:
                 recorded_ph = n_item["soil_ph"]
 
                 if nut_result.success:
-                    # Missing nutrient badge (as specified: st.info("Deficiency: ..."))
-                    st.info(f"### Deficiency identified: {nut_result.diagnosis}", icon=":material/science:")
+                    if nut_result.limitation_notice:
+                        st.warning(f"### Deficiency identified: {nut_result.diagnosis}", icon=":material/help:")
+                        st.caption(nut_result.limitation_notice)
+                    else:
+                        # Missing nutrient badge (as specified: st.info("Deficiency: ..."))
+                        st.info(f"### Deficiency identified: {nut_result.diagnosis}", icon=":material/science:")
 
                     n1, n2, n3 = st.columns(3)
                     n1.metric("Certainty score", f"{nut_result.confidence}%")
                     n2.metric("Soil pH", f"{recorded_ph}")
                     n3.metric("Latency", f"{latency:.2f} ms")
+
+                    # Certainty factor visual meter
+                    render_confidence_meter(nut_result.confidence)
+
+                    # Rule Category Badge
+                    render_modality_badge(
+                        "partial" if nut_result.details.get("match_type") == "partial" else nut_result.details.get("rule_type", "hardcoded"),
+                        nut_result.confidence
+                    )
 
                     # Prescribed NPK fertilizer dosage card
                     st.markdown("##### Prescribed NPK and soil remediation schedule:")
