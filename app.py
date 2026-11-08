@@ -1,6 +1,6 @@
-"""Kisan Rahbar (کسان رہبر) - Pakistan Agriculture Expert System
+"""Pakistan Agriculture Expert System
 Automated Crop Disease, Pest Management, and Fertilizer Advisory Portal.
-Built for Pakistani Farmers and University CCP Viva Evaluation.
+Built for Academic Evaluation and Agricultural Extension.
 """
 
 import time
@@ -14,7 +14,7 @@ from explanation_module import ExplanationModule
 
 # Page Configuration
 st.set_page_config(
-    page_title="Kisan Rahbar | Pakistan Agriculture Expert System",
+    page_title="Pakistan Agriculture Expert System",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -55,19 +55,19 @@ def render_explanation_expander(
 
 # Crop Display Mapping
 CROPS_DISPLAY: Dict[str, str] = {
-    "wheat": "Wheat (گندم - Gandum)",
-    "cotton": "Cotton (کپاس - Kapas)",
-    "rice": "Rice (دھان / چاول - Dhan)",
-    "sugarcane": "Sugarcane (کماد / گنا - Kamad)",
-    "maize": "Maize (مکئی - Makai)",
+    "wheat": "Wheat",
+    "cotton": "Cotton",
+    "rice": "Rice",
+    "sugarcane": "Sugarcane",
+    "maize": "Maize",
 }
 
 # Symptom Dictionaries per Crop
 CROP_SYMPTOMS: Dict[str, Dict[str, str]] = {
     "wheat": {
-        "yellow_pustules_stripes": "Yellow powdery pustules in parallel stripes on leaves (Peeli Kungi)",
-        "brown_oval_pustules": "Scattered brown/orange oval pustules without striping (Bhoori Kungi)",
-        "black_powdery_heads": "Entire ear head transformed into black sooty powder (Loose Smut / Kani)",
+        "yellow_pustules_stripes": "Yellow powdery pustules in parallel stripes on leaves (Stripe Rust)",
+        "brown_oval_pustules": "Scattered brown/orange oval pustules without striping (Leaf Rust)",
+        "black_powdery_heads": "Entire ear head transformed into black sooty powder (Loose Smut)",
         "fishy_smell_grains": "Blackened kernels with rotten fishy smell (Karnal Bunt)",
         "blackened_kernels": "Partially shriveled blackened grain seeds"
     },
@@ -110,9 +110,9 @@ WEATHER_CONDITIONS: Dict[str, str] = {
 
 
 # Header
-st.title("Kisan Rahbar | کسان رہبر")
+st.title("Pakistan Agriculture Expert System")
 st.caption(
-    "Automated Agronomy Expert System for Pakistan's Major Crops: "
+    "Automated Agronomy Expert System for Major Crops: "
     "Wheat, Cotton, Rice, Sugarcane, and Maize."
 )
 
@@ -159,7 +159,7 @@ with tab_disease:
         with st.form("disease_form", border=True):
             st.markdown("#### Field Disease Observation Form")
             selected_crop_key = st.selectbox(
-                "Select Crop (فصل منتخب کریں)",
+                "Select Crop",
                 options=list(CROPS_DISPLAY.keys()),
                 format_func=lambda k: CROPS_DISPLAY[k],
                 key="dis_crop_select"
@@ -168,7 +168,7 @@ with tab_disease:
             # Retrieve crop-specific symptoms
             available_symptoms = CROP_SYMPTOMS.get(selected_crop_key, {})
             selected_symptom_keys = st.multiselect(
-                "Select Observed Symptoms (علامات منتخب کریں)",
+                "Select Observed Symptoms",
                 options=list(available_symptoms.keys()),
                 format_func=lambda k: available_symptoms[k],
                 placeholder="Choose one or more observed leaf/ear signs...",
@@ -176,14 +176,14 @@ with tab_disease:
             )
 
             weather_choice = st.radio(
-                "Current / Recent Field Weather Conditions (موسمی کیفیت)",
+                "Current / Recent Field Weather Conditions",
                 options=list(WEATHER_CONDITIONS.keys()),
                 format_func=lambda k: WEATHER_CONDITIONS[k],
                 key="dis_weather_radio"
             )
 
             diagnose_disease_btn = st.form_submit_button(
-                "Diagnose Disease (تشخیص کریں)",
+                "Diagnose Disease",
                 width="stretch",
                 type="primary"
             )
@@ -276,26 +276,26 @@ with tab_pest:
         with st.form("pest_form", border=True):
             st.markdown("#### Pest Observation Form")
             pest_crop_key = st.selectbox(
-                "Select Crop (فصل)",
+                "Select Crop",
                 options=list(CROPS_DISPLAY.keys()),
                 format_func=lambda k: CROPS_DISPLAY[k],
                 key="pest_crop_select"
             )
 
             plant_zone = st.selectbox(
-                "Target Plant Zone (نقصان کا حصہ)",
+                "Target Plant Zone",
                 options=["leaves", "stems", "roots", "fruit"],
                 format_func=lambda z: {
-                    "leaves": "Leaves (پتے)",
-                    "stems": "Stems / Tillers (تنے)",
-                    "roots": "Roots / Underground (جڑیں)",
-                    "fruit": "Fruit / Bolls / Ears / Cobs (پھل / پھٹی / سٹے / چھلی)"
+                    "leaves": "Leaves",
+                    "stems": "Stems / Tillers",
+                    "roots": "Roots / Underground",
+                    "fruit": "Fruit / Bolls / Ears / Cobs"
                 }.get(z, z.title()),
                 key="pest_zone_select"
             )
 
             visible_damage_list = st.multiselect(
-                "Visible Damage Checklist (نقصان کی علامات)",
+                "Visible Damage Checklist",
                 options=[
                     "chewed_leaf_margins",
                     "fine_silky_webbing",
@@ -304,17 +304,17 @@ with tab_pest:
                     "dry_wilted_plants"
                 ],
                 format_func=lambda d: {
-                    "chewed_leaf_margins": "Chewed leaf margins / shot-holes (کترے ہوئے پتے)",
-                    "fine_silky_webbing": "Fine silky webbing under leaves (باریک جالا)",
-                    "sticky_honeydew": "Sticky honeydew with black sooty mold (چپچپا مواد)",
-                    "bore_holes": "Bore holes with frass / sawdust (سوراخ اور فضلے کے ذرات)",
-                    "dry_wilted_plants": "Dry, wilted or dead hearts (خشک سوکھے ہوئے پودے)"
+                    "chewed_leaf_margins": "Chewed leaf margins / shot-holes",
+                    "fine_silky_webbing": "Fine silky webbing under leaves",
+                    "sticky_honeydew": "Sticky honeydew with black sooty mold",
+                    "bore_holes": "Bore holes with frass / sawdust",
+                    "dry_wilted_plants": "Dry, wilted or dead hearts"
                 }.get(d, d.replace("_", " ").title()),
                 key="pest_damage_multiselect"
             )
 
             pest_sighting = st.radio(
-                "Pest Sightings (دیکھا گیا کیڑا)",
+                "Pest Sightings",
                 options=[
                     "none_seen",
                     "tiny_green_insects",
@@ -326,14 +326,14 @@ with tab_pest:
                     "tiny_red_mites"
                 ],
                 format_func=lambda s: {
-                    "none_seen": "None seen directly (کوئی نظر نہیں آیا)",
-                    "tiny_green_insects": "Tiny soft green insects (چھوٹا سبز کیڑا / تیلہ)",
-                    "white_flying_flies": "White flying flies (سفید مکھی)",
-                    "caterpillars": "Caterpillars / Larvae / Worms (سنڈیاں / کیڑے)",
-                    "white_waxy_clusters": "White waxy clusters on stems (سفید گدی دار کیڑا)",
-                    "tiny_brown_hoppers": "Tiny brown hoppers near base (بھورا تیلا)",
-                    "jumping_leafhoppers": "Active jumping leafhoppers (پتے کا ٹڈا)",
-                    "tiny_red_mites": "Tiny reddish moving specks / mites (سرخ مکڑی)"
+                    "none_seen": "None seen directly",
+                    "tiny_green_insects": "Tiny soft green insects (Aphids)",
+                    "white_flying_flies": "White flying flies (Whitefly)",
+                    "caterpillars": "Caterpillars / Larvae / Borers",
+                    "white_waxy_clusters": "White waxy clusters on stems (Mealybug)",
+                    "tiny_brown_hoppers": "Tiny brown hoppers near base (Planthopper)",
+                    "jumping_leafhoppers": "Active jumping leafhoppers (Jassids)",
+                    "tiny_red_mites": "Tiny reddish moving specks / mites"
                 }.get(s, s.replace("_", " ").title()),
                 key="pest_sighting_radio"
             )
@@ -452,25 +452,25 @@ with tab_nutrient:
 
             nut_crop_options = ["all"] + list(CROPS_DISPLAY.keys())
             nut_crop_key = st.selectbox(
-                "Target Crop (فصل منتخب کریں)",
+                "Target Crop",
                 options=nut_crop_options,
                 format_func=lambda k: "All Crops / Universal Soil Check" if k == "all" else CROPS_DISPLAY[k],
                 key="nut_crop_select"
             )
 
             crop_stage = st.selectbox(
-                "Crop Growth Stage (فصل کا مرحلہ)",
+                "Crop Growth Stage",
                 options=["vegetative", "flowering", "fruiting"],
                 format_func=lambda s: {
-                    "vegetative": "Vegetative / Tillering Stage (شاخیں نکلنے کا مرحلہ)",
-                    "flowering": "Flowering / Boot Stage (پھول اور گوبھ کا مرحلہ)",
-                    "fruiting": "Fruiting / Boll-fill / Grain Formation (پھل / سٹہ بننے کا مرحلہ)"
+                    "vegetative": "Vegetative / Tillering Stage",
+                    "flowering": "Flowering / Boot Stage",
+                    "fruiting": "Fruiting / Boll-fill / Grain Formation"
                 }.get(s, s.title()),
                 key="nut_stage_select"
             )
 
             leaf_discoloration = st.selectbox(
-                "Leaf Discoloration Map (پتوں کی رنگت میں تبدیلی)",
+                "Leaf Discoloration Map",
                 options=[
                     "none",
                     "lower_leaves_yellowing",
@@ -479,17 +479,17 @@ with tab_nutrient:
                     "interveinal_chlorosis"
                 ],
                 format_func=lambda d: {
-                    "none": "No significant discoloration (کوئی خاص رنگت نہیں)",
-                    "lower_leaves_yellowing": "Lower / older leaves yellowing (نچلے پتے پیلے ہونا)",
-                    "leaf_edges_scorched_brown": "Leaf edges scorched brown / necrosis (پتوں کے کنارے جھلسے ہوئے)",
-                    "purple_leaf_undersides": "Purple leaf undersides / anthocyanin (پتوں کی نچلی سطح جامنی ہونا)",
-                    "interveinal_chlorosis": "Interveinal chlorosis / white bleached bands (رگوں کے درمیان پیلا پن)"
+                    "none": "No significant discoloration",
+                    "lower_leaves_yellowing": "Lower / older leaves yellowing (Nitrogen/Potassium deficit)",
+                    "leaf_edges_scorched_brown": "Leaf edges scorched brown / necrosis (Potassium deficit)",
+                    "purple_leaf_undersides": "Purple leaf undersides / anthocyanin (Phosphorus deficit)",
+                    "interveinal_chlorosis": "Interveinal chlorosis / bleached bands (Zinc/Iron deficit)"
                 }.get(d, d.replace("_", " ").title()),
                 key="nut_discoloration_select"
             )
 
             soil_ph = st.slider(
-                "Measured Soil pH (زمین کی پی ایچ)",
+                "Measured Soil pH",
                 min_value=4.5,
                 max_value=8.5,
                 value=7.8,

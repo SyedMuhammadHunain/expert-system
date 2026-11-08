@@ -20,12 +20,12 @@
 ## Task 2: Complete Urdu Language & Transliteration Purge
 **Description:** Remove all Urdu script (`[\u0600-\u06ff]`) and romanized Urdu terms (e.g., `Gandum`, `Kapas`, `Dhan`, `Kamad`, `Makai`, `Peeli Kungi`, `Bhoori Kungi`, `Kani`, `تشخیص کریں`) from `app.py`. Standardize all labels and symptoms into precise agronomic English and accepted scientific nomenclature.
 **Acceptance criteria:**
-- [ ] Crop dropdown labels use clean English: `Wheat`, `Cotton`, `Rice`, `Sugarcane`, `Maize`.
-- [ ] Symptom dictionary values use standard pathological and anatomical English descriptions.
-- [ ] UI title, sidebar, headers, and form inputs contain 0 Urdu characters or transliterations.
+- [x] Crop dropdown labels use clean English: `Wheat`, `Cotton`, `Rice`, `Sugarcane`, `Maize`.
+- [x] Symptom dictionary values use standard pathological and anatomical English descriptions.
+- [x] UI title, sidebar, headers, and form inputs contain 0 Urdu characters or transliterations.
 **Verification:**
-- [ ] Python unicode regex confirms 0 characters in range `\u0600-\u06ff` in `app.py`.
-- [ ] `pytest -v tests/` passes.
+- [x] Python unicode regex confirms 0 characters in range `\u0600-\u06ff` in `app.py`.
+- [x] `pytest -v tests/` passes.
 **Dependencies:** Task 1
 **Files likely touched:**
 - `app.py`
@@ -34,9 +34,9 @@
 ---
 
 ## Checkpoint 1: Visual & Text Sanitization
-- [ ] Zero emojis in `app.py`
-- [ ] Zero Urdu script in `app.py`
-- [ ] Automated tests pass (`pytest -v tests/`)
+- [x] Zero emojis in `app.py`
+- [x] Zero Urdu script in `app.py`
+- [x] Automated tests pass (`pytest -v tests/`)
 
 ---
 
