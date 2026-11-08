@@ -120,7 +120,9 @@ class InferenceEngine:
         """Build InferenceResult from matched (or partially matched) candidates."""
 
         # Conflict Resolution & Rule Extension Escalation
-        selected_rule, final_cf, fired_conds = self._resolve_conflicts(matched_candidates)
+        selected_rule, final_cf, fired_conds = self._resolve_conflicts(
+            matched_candidates, is_partial=is_partial
+        )
 
         # Log rule firing in working memory
         memory.log_rule_firing(
@@ -373,13 +375,26 @@ class InferenceEngine:
         return rule_cf * min_fact_cf
 
     def _resolve_conflicts(
-        self, candidates: List[Tuple[Rule, float, Dict[str, Any]]]
+        self,
+        candidates: List[Tuple[Rule, float, Dict[str, Any]]],
+        is_partial: bool = False,
     ) -> Tuple[Rule, float, Dict[str, Any]]:
         """Conflict resolution:
-        1. Give priority to EXTENDED rules over their base rules.
-        2. Give priority to higher specificity (more condition keys).
+        1. If strict match, give priority to EXTENDED rules over their base rules.
+        2. If partial match, prioritize candidate with highest proportional Certainty Factor and condition coverage.
         3. Break ties with higher Certainty Factor.
         """
+        if is_partial:
+            # In partial matching, do not allow weakly matched extended rules
+            # to suppress higher-confidence base rules.
+            # Sort by: adjusted CF (highest first), then conditions fired (most first).
+            sorted_candidates = sorted(
+                candidates,
+                key=lambda item: (item[1], len(item[2])),
+                reverse=True
+            )
+            return sorted_candidates[0]
+
         # Check if an extended rule supersedes another
         extended_from_ids = {
             r.extended_from for r, _, _ in candidates if r.extended_from
