@@ -15,7 +15,6 @@ from explanation_module import ExplanationModule
 # Page Configuration
 st.set_page_config(
     page_title="Kisan Rahbar | Pakistan Agriculture Expert System",
-    page_icon="🌾",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -36,18 +35,18 @@ engine, explainer = get_system_components()
 def render_modality_badge(rule_type: str, confidence: float) -> None:
     """Render informative badge explaining rule modality."""
     if rule_type == "hardcoded":
-        st.caption("🔖 **Rule Modality:** Hardcoded Deterministic (100% textbook match)")
+        st.caption("**Rule Modality:** Hardcoded Deterministic (100% textbook match)")
     elif rule_type == "may_or_may_not":
-        st.caption(f"🔖 **Rule Modality:** Probabilistic Inference ({confidence}% Certainty Factor)")
+        st.caption(f"**Rule Modality:** Probabilistic Inference ({confidence}% Certainty Factor)")
     elif rule_type == "extended":
-        st.caption("🔖 **Rule Modality:** Extended Rule (Weather/Harvest/Safety Escalation)")
+        st.caption("**Rule Modality:** Extended Rule (Weather/Harvest/Safety Escalation)")
 
 
 def render_explanation_expander(
     explanation: Dict[str, Any], title: str = "View Expert Decision Trail & Reasoning"
 ) -> None:
     """Render reasoning steps and system boundary limitations."""
-    with st.expander(f"🔎 {title}"):
+    with st.expander(title):
         for s in explanation.get("steps", []):
             st.markdown(f"**{s['step']}**: {s['detail']}")
         if limits := explanation.get("limitations"):
@@ -111,7 +110,7 @@ WEATHER_CONDITIONS: Dict[str, str] = {
 
 
 # Header
-st.title("🌾 Kisan Rahbar | کسان رہبر")
+st.title("Kisan Rahbar | کسان رہبر")
 st.caption(
     "Automated Agronomy Expert System for Pakistan's Major Crops: "
     "Wheat, Cotton, Rice, Sugarcane, and Maize."
@@ -119,8 +118,8 @@ st.caption(
 
 # Sidebar System Health & Architecture Info
 with st.sidebar:
-    st.header("⚙️ Expert System Info")
-    st.success("● Engine Status: Online & Certified")
+    st.header("Expert System Information")
+    st.success("Engine Status: Online & Certified")
     st.metric(label="Loaded Rules", value=len(RULES), delta="Exceeds 50 required")
     st.metric(label="Targeted Crops", value=5, delta="Pakistani Major Crops")
     st.markdown("---")
@@ -137,9 +136,9 @@ with st.sidebar:
 
 # Tabs
 tab_disease, tab_pest, tab_nutrient = st.tabs([
-    "🔬 1. Crop Disease Diagnosis",
-    "🐛 2. Pest Identification & Safety Guard",
-    "🌱 3. Nutrient Deficiency & Fertilizer"
+    "1. Crop Disease Diagnosis",
+    "2. Pest Identification & Safety Guard",
+    "3. Nutrient Deficiency & Fertilizer"
 ])
 
 
@@ -158,7 +157,7 @@ with tab_disease:
 
     with col_in:
         with st.form("disease_form", border=True):
-            st.markdown("#### 📋 Field Disease Observation Form")
+            st.markdown("#### Field Disease Observation Form")
             selected_crop_key = st.selectbox(
                 "Select Crop (فصل منتخب کریں)",
                 options=list(CROPS_DISPLAY.keys()),
@@ -184,7 +183,7 @@ with tab_disease:
             )
 
             diagnose_disease_btn = st.form_submit_button(
-                "🔍 Diagnose Disease (تشخیص کریں)",
+                "Diagnose Disease (تشخیص کریں)",
                 width="stretch",
                 type="primary"
             )
@@ -216,10 +215,10 @@ with tab_disease:
 
     with col_out:
         with st.container(border=True):
-            st.markdown("#### 🩺 Expert System Diagnostic Report")
+            st.markdown("#### Expert System Diagnostic Report")
 
             if st.session_state.get("dis_error"):
-                st.warning(f"⚠️ {st.session_state['dis_error']}")
+                st.warning(f"{st.session_state['dis_error']}")
             elif "dis_result" in st.session_state:
                 item = st.session_state["dis_result"]
                 result: InferenceResult = item["result"]
@@ -239,7 +238,7 @@ with tab_disease:
                     render_modality_badge(result.details.get("rule_type", "hardcoded"), result.confidence)
 
                     # Treatment Remedies
-                    st.markdown("##### 💊 Prescribed Remedies & Solutions:")
+                    st.markdown("##### Prescribed Remedies & Solutions:")
                     for idx, remedy in enumerate(result.remedies, 1):
                         st.markdown(f"**{idx}.** {remedy}")
 
@@ -251,7 +250,7 @@ with tab_disease:
                         "The expert system could not match these specific symptoms with high confidence. "
                         "To protect crop health, the system avoids speculative guessing."
                     )
-                    st.markdown("##### 💡 Recommended Next Actions:")
+                    st.markdown("##### Recommended Next Actions:")
                     for idx, rem in enumerate(result.remedies, 1):
                         st.markdown(f"**{idx}.** {rem}")
 
@@ -275,7 +274,7 @@ with tab_pest:
 
     with col_pest_in:
         with st.form("pest_form", border=True):
-            st.markdown("#### 🐛 Pest Observation Form")
+            st.markdown("#### Pest Observation Form")
             pest_crop_key = st.selectbox(
                 "Select Crop (فصل)",
                 options=list(CROPS_DISPLAY.keys()),
@@ -287,10 +286,10 @@ with tab_pest:
                 "Target Plant Zone (نقصان کا حصہ)",
                 options=["leaves", "stems", "roots", "fruit"],
                 format_func=lambda z: {
-                    "leaves": "🍃 Leaves (پتے)",
-                    "stems": "🎋 Stems / Tillers (تنے)",
-                    "roots": "🌱 Roots / Underground (جڑیں)",
-                    "fruit": "🌾 Fruit / Bolls / Ears / Cobs (پھل / پھٹی / سٹے / چھلی)"
+                    "leaves": "Leaves (پتے)",
+                    "stems": "Stems / Tillers (تنے)",
+                    "roots": "Roots / Underground (جڑیں)",
+                    "fruit": "Fruit / Bolls / Ears / Cobs (پھل / پھٹی / سٹے / چھلی)"
                 }.get(z, z.title()),
                 key="pest_zone_select"
             )
@@ -341,13 +340,13 @@ with tab_pest:
 
             st.markdown("---")
             near_harvest_val = st.toggle(
-                "🚨 Harvest is Close (< 14 - 21 Days to Harvest)",
+                "Harvest is Close (< 14 - 21 Days to Harvest)",
                 help="Activating this triggers the Pre-Harvest Interval (PHI) safety guard, blocking hazardous chemicals to protect human food safety.",
                 key="pest_harvest_toggle"
             )
 
             diagnose_pest_btn = st.form_submit_button(
-                "🛡️ Identify Pest & Get Solutions",
+                "Identify Pest & Get Solutions",
                 width="stretch",
                 type="primary"
             )
@@ -380,10 +379,10 @@ with tab_pest:
 
     with col_pest_out:
         with st.container(border=True):
-            st.markdown("#### 🔍 Pest Identification & IPM Advisory")
+            st.markdown("#### Pest Identification & IPM Advisory")
 
             if st.session_state.get("pest_error"):
-                st.warning(f"⚠️ {st.session_state['pest_error']}")
+                st.warning(f"{st.session_state['pest_error']}")
             elif "pest_result" in st.session_state:
                 p_item = st.session_state["pest_result"]
                 pest_result: InferenceResult = p_item["result"]
@@ -401,7 +400,7 @@ with tab_pest:
                     # Pre-Harvest Lockout Warning Callout
                     if pest_result.chemical_blocked:
                         st.error(
-                            "🚨 **PRE-HARVEST SAFETY LOCKOUT TRIGGERED:**\n\n"
+                            "**PRE-HARVEST SAFETY LOCKOUT TRIGGERED:**\n\n"
                             "Crop harvest is imminent. Synthetic chemical sprays are **STRICTLY BLOCKED** "
                             "to avoid toxic pesticide residue in grains and fiber. Only non-toxic biological "
                             "and cultural controls are permitted.",
@@ -409,13 +408,13 @@ with tab_pest:
                         )
 
                     # Biological Controls Column vs Chemical Insecticides
-                    st.markdown("##### 🐞 Biological & Cultural Controls:")
+                    st.markdown("##### Biological & Cultural Controls:")
                     bio_remedies = [r for r in pest_result.remedies if "BLOCKED" not in r and "SAFETY WARNING" not in r and "EC" not in r and "SC" not in r and "SL" not in r and "WG" not in r and "4G" not in r and "3G" not in r]
                     for b in bio_remedies:
                         st.markdown(f"- {b}")
 
                     if not pest_result.chemical_blocked:
-                        st.markdown("##### 🧪 Chemical Insecticide Options (Apply with protective gear):")
+                        st.markdown("##### Chemical Insecticide Options (Apply with protective gear):")
                         chem_remedies = [r for r in pest_result.remedies if r not in bio_remedies]
                         for c in chem_remedies:
                             st.markdown(f"- {c}")
@@ -449,7 +448,7 @@ with tab_nutrient:
 
     with col_nut_in:
         with st.form("nutrient_form", border=True):
-            st.markdown("#### 🧪 Soil & Foliage Input Form")
+            st.markdown("#### Soil & Foliage Input Form")
 
             nut_crop_options = ["all"] + list(CROPS_DISPLAY.keys())
             nut_crop_key = st.selectbox(
@@ -463,9 +462,9 @@ with tab_nutrient:
                 "Crop Growth Stage (فصل کا مرحلہ)",
                 options=["vegetative", "flowering", "fruiting"],
                 format_func=lambda s: {
-                    "vegetative": "🌿 Vegetative / Tillering Stage (شاخیں نکلنے کا مرحلہ)",
-                    "flowering": "🌸 Flowering / Boot Stage (پھول اور گوبھ کا مرحلہ)",
-                    "fruiting": "🌾 Fruiting / Boll-fill / Grain Formation (پھل / سٹہ بننے کا مرحلہ)"
+                    "vegetative": "Vegetative / Tillering Stage (شاخیں نکلنے کا مرحلہ)",
+                    "flowering": "Flowering / Boot Stage (پھول اور گوبھ کا مرحلہ)",
+                    "fruiting": "Fruiting / Boll-fill / Grain Formation (پھل / سٹہ بننے کا مرحلہ)"
                 }.get(s, s.title()),
                 key="nut_stage_select"
             )
@@ -508,7 +507,7 @@ with tab_nutrient:
                 st.success(f"Soil Status: Optimal / Moderately Alkaline (pH {soil_ph}) — Standard Indus plain range.")
 
             diagnose_nut_btn = st.form_submit_button(
-                "🌾 Prescribe Fertilizer & Soil Fix",
+                "Prescribe Fertilizer & Soil Fix",
                 width="stretch",
                 type="primary"
             )
@@ -534,7 +533,7 @@ with tab_nutrient:
 
     with col_nut_out:
         with st.container(border=True):
-            st.markdown("#### 📋 Expert Soil & Fertilizer Prescription")
+            st.markdown("#### Expert Soil & Fertilizer Prescription")
 
             if "nut_result" in st.session_state:
                 n_item = st.session_state["nut_result"]
@@ -553,13 +552,13 @@ with tab_nutrient:
                     n3.metric("Latency", f"{latency:.2f} ms")
 
                     # Prescribed NPK fertilizer dosage card
-                    st.markdown("##### 📦 Prescribed NPK & Soil Remediation Card:")
+                    st.markdown("##### Prescribed NPK & Soil Remediation Card:")
                     for idx, rem in enumerate(nut_result.remedies, 1):
                         st.markdown(f"- **{rem}**")
 
                     # Recovery timeline estimate (as specified: st.caption("Expected foliage recovery: ..."))
                     timeline_val = nut_result.details.get("recovery_timeline", "7-14 days")
-                    st.caption(f"⏱️ **Expected foliage recovery timeline:** {timeline_val}")
+                    st.caption(f"**Expected foliage recovery timeline:** {timeline_val}")
 
                     render_explanation_expander(nut_explanation, title="View Expert Decision Trail & Soil Chemistry Reasoning")
 
