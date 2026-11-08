@@ -1,45 +1,61 @@
-# Implementation Plan: Pakistan Agriculture Expert System (Kisan Rahbar)
+# Implementation Plan: UI Professionalization, Accessibility & Visualization
 
 ## Overview
-A fault-tolerant, pure Python rule-based expert system and Streamlit web application providing disease identification, pest management, and fertilizer prescriptions for Pakistan's top 5 crops (Wheat, Cotton, Rice, Sugarcane, Maize). It satisfies all university CCP course requirements: 50+ rules, 3 rule modalities (hardcoded, may-or-may-not, extended), working memory, explanation facility, and sub-second zero-crash inference.
+Transform Kisan Rahbar into an enterprise-grade, accessible, academic-grade agronomy expert system UI. Purge all emojis and Urdu text across the entire user interface and documentation. Maximize readability and WCAG accessibility (semantic typography, high contrast, clean card borders, aria labels). Add clean, native charts and graphs using Streamlit native charts and Altair (already installed with zero extra dependencies) to visually display Certainty Factor distributions, soil pH spectrum, and rule coverage metrics.
+
+---
+
+## Recommended Visualizations: Charts & Graphs Analysis
+
+Since `streamlit`, `pandas`, `altair`, and `numpy` are installed out of the box in the virtualenv:
+
+1. **Tab 1 & 2: Diagnosis Certainty Score Bar / Gauge (`altair` or `st.progress`)**
+   - Horizontal confidence indicator chart comparing current diagnosis certainty against system threshold (0.50 threshold to 1.0 peak).
+   - Color coding: Muted Blue / Dark Teal for high certainty, Amber for partial suspicion.
+2. **Tab 3: Soil pH Chemistry Spectrum Bar Chart (`altair`)**
+   - Visual band showing Acidic (<6.0, Coral/Amber), Optimal (6.0 - 7.5, Emerald Green), Alkaline / Calcareous (>7.5, Steel Blue).
+   - A vertical needle or highlighted bar pinpointing the selected field pH (e.g. 7.8) with deficiency trigger ranges.
+3. **Tab 3: Prescribed NPK Nutrient Ratio Bar Chart (`st.bar_chart` or `altair`)**
+   - Visual comparison of Nitrogen (N), Phosphorus (P2O5), Potassium (K2O), and Zinc (Zn) kg/acre dosage recommendations based on crop and soil stage.
+4. **Sidebar: Knowledge Base Domain Distribution Donut/Bar (`altair`)**
+   - Clean breakdown of the 60 rules: Plant Pathology (25), Entomology (20), Soil Science (15) with modal classification (Hardcoded: 34, May/May Not: 15, Extended: 11).
+
+---
 
 ## Architecture Decisions
-- **Pure Python Engine:** No external binary dependencies (no SWI-Prolog) to guarantee 100% stability on Streamlit Community Cloud.
-- **Rule Categorization:**
-  - *Hardcoded:* 1.0 certainty factor exact symptom-crop matches.
-  - *May or May Not:* Partial symptom matches with explicit Certainty Factors (0.4 - 0.85).
-  - *Extended:* Rules that take base condition and refine/override conclusion based on environmental/weather/crop-stage triggers.
-- **Defensive Execution:** The inference engine and UI are wrapped in safe boundary handlers; unmatched inputs return informative diagnostic guidance rather than unhandled Python exceptions.
-- **Modular Component Isolation:** Direct separation of concerns per high-level design: UI (`app.py`), Engine (`inference_engine.py`), Memory (`working_memory.py`), Rules (`knowledge_base.py`), Explanations (`explanation_module.py`).
+- **Decision 1: Zero External Dependencies for Visualization.** Use `altair` and `streamlit` native primitives (`st.altair_chart`, `st.bar_chart`, `st.progress`). Keeps zero-footprint deployment on Streamlit Community Cloud.
+- **Decision 2: Strict Monolingual English.** Replace all transliterated Urdu (e.g., "Gandum", "Kungi", "Makai") and Arabic-script Urdu ("کسان رہبر", "گندم") with standardized agronomic English and accepted botanical/taxonomic nomenclature.
+- **Decision 3: Zero Emoji Iconography.** Strip all Unicode emojis from `page_icon`, headers, tabs, expanders, buttons, and status boxes. Replace with clean CSS indicators, semantic Material/Streamlit icons (`:material/check_circle:`, `:material/warning:`), or crisp typographic labeling.
+- **Decision 4: WCAG 2.1 AA Accessibility & Contrast.** Use semantic markdown headings (`h1`-`h4`), high-contrast label formatting, explicit placeholder texts, accessible form field associations, and structured table/metric layouts.
+
+---
 
 ## Task List
 
-### Phase 1: Environment & Knowledge Base Foundation
-- [ ] Task 1: Environment Setup & Data Contracts (`requirements.txt`, core classes)
-- [ ] Task 2: 50+ Agricultural Rules Codification (`knowledge_base.py`)
-- [ ] Checkpoint: Foundation & Rules verification (>= 50 rules defined across 5 crops)
+### Phase 1: Text & Iconography Cleanup
+- [ ] Task 1: Complete Emoji Removal from UI & Code
+- [ ] Task 2: Complete Urdu Language & Transliteration Purge to Clean English
 
-### Phase 2: Engine, Working Memory & Explanation Module
-- [ ] Task 3: Working Memory & State Management (`working_memory.py`)
-- [ ] Task 4: Pure Python Inference Engine (`inference_engine.py`)
-- [ ] Task 5: Explanation & Limitations Facility (`explanation_module.py`)
-- [ ] Task 6: Comprehensive Unit Test Suite (`tests/test_rules.py`)
-- [ ] Checkpoint: Engine & Logic verification (all tests pass, inference < 1.0s)
+### Checkpoint 1: Visual & Text Sanitization
+- [ ] Run grep/regex verification: 0 emojis and 0 Urdu characters in `app.py`.
+- [ ] All 23 automated pytest cases pass without regressions.
 
-### Phase 3: Streamlit UI & End-to-End Verification
-- [ ] Task 7: Streamlit UI - Disease Diagnosis Tab (`app.py`)
-- [ ] Task 8: Streamlit UI - Pest Management Tab with Pre-Harvest Safety Guard (`app.py`)
-- [ ] Task 9: Streamlit UI - Soil & Fertilizer Prescription Tab (`app.py`)
-- [ ] Task 10: Fault-Tolerance & Deployment Audit (Streamlit reload < 500ms, zero tracebacks)
-- [ ] Checkpoint: Complete System End-to-End Test and Viva Readiness
+### Phase 2: Readability & Accessibility Enhancements
+- [ ] Task 3: Improve UI Typography, Semantic Hierarchy & Accessibility (WCAG 2.1 AA)
+
+### Phase 3: Visual Analytics (Charts & Graphs)
+- [ ] Task 4: Add Rule Distribution Chart in Sidebar & Certainty Factor Meter in Tabs 1/2
+- [ ] Task 5: Add Soil pH Chemistry Spectrum & NPK Ratio Chart in Tab 3
+
+### Checkpoint 2: Final Verification & Test Integrity
+- [ ] Headless `pytest -v tests/` 100% green.
+- [ ] Verify clean, professional UI layout via Playwright/Browser inspection.
+
+---
 
 ## Risks and Mitigations
 | Risk | Impact | Mitigation |
-|------|--------|------------|
-| Rule count < 50 triggers marks deduction | High | Programmatic test assertion in `tests/test_rules.py` enforcing `len(RULES) >= 50`. |
-| Unhandled exception during viva evaluation | High | Engine returns structured `InferenceResult` with error/boundary flags; UI never bubbles raw tracebacks. |
-| Streamlit Cloud deployment failures | Medium | Keep dependencies minimal (`streamlit`, `pytest`) in standard `requirements.txt`. |
-| Performance latency exceeding 1.0s | Low | Rules indexed by category and crop in memory; direct dict matching evaluates in < 5ms. |
-
-## Open Questions
-- None. Spec and requirements approved.
+|:---|:---|:---|
+| Test suite relies on emoji or Urdu string assertions | High | Checked `tests/test_ui.py`: it asserts `"Brown Rust"`, `"Pink Bollworm"`, `"at least one observed symptom"`. No tests depend on emojis or Urdu. |
+| Plotting library overhead slows down Streamlit rerun | Med | Use lightweight Altair charts with pre-aggregated tidy DataFrames, keeping reruns < 30ms. |
+| Contrast failure on dark/light Streamlit themes | Med | Use theme-adaptive Altair color specs or neutral high-contrast hex codes (`#1f77b4`, `#2ca02c`, `#d62728`). |

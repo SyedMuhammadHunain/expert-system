@@ -194,10 +194,9 @@ st.caption(
 
 # Sidebar System Health & Architecture Info
 with st.sidebar:
-    st.header("Expert system information")
-    st.success("Engine status: Certified operational", icon=":material/check_circle:")
-    st.metric(label="Loaded rules", value=len(RULES), delta="Exceeds 50 required")
-    st.metric(label="Targeted crops", value=5, delta="Pakistani major crops")
+    st.header("Expert System")
+    st.metric(label="Loaded rules", value=len(RULES))
+    st.metric(label="Targeted crops", value=5)
 
     # Knowledge Base Domain Composition Chart
     st.subheader("Knowledge base distribution")
@@ -221,22 +220,13 @@ with st.sidebar:
     )
     st.altair_chart(chart_kb, width="stretch", alt="Knowledge base rule count distribution across Disease, Pest, and Nutrient domains")
 
-    st.divider()
-    st.subheader("System architecture")
-    st.markdown(
-        "- **Inference:** Pure Python forward-chaining\n"
-        "- **Certainty factors:** 0.0 to 1.0\n"
-        "- **Safety guard:** Pre-harvest interval (PHI)\n"
-        "- **Audit trail:** Working memory trace"
-    )
-    st.divider()
-    st.caption("Developed for academic viva defense and agricultural extension.")
+    
 
 
 # Tabs
 tab_disease, tab_pest, tab_nutrient = st.tabs([
-    "1. Crop disease diagnosis",
-    "2. Pest identification and safety guard",
+    "1. Crop Disease Identification",
+    "2. Pest identification",
     "3. Nutrient deficiency and fertilizer"
 ])
 
