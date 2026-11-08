@@ -1,37 +1,39 @@
-# Implementation Plan: Generate Project Report Word Document (.docx)
+# Implementation Plan: Clean Code Comments via Antislop-Code
 
 ## Overview
-Generate a clean, professional, submission-ready project report document (`Project_Report_Expert_System.docx`) for the Pakistan Agriculture Expert System adhering strictly to the user's structural, typograhic, and color specifications.
+Audit and clean code comments across the Python codebase (`app.py`, `inference_engine.py`, `knowledge_base.py`, `working_memory.py`, `explanation_module.py`, and test files). Remove decorative banner headers (`# ============`), narrating step-by-step markers, empty category labels, and obvious restatements. Preserve business logic, domain agrochemical rules, safety constraints (such as pre-harvest safety lockout rationale), and architectural/API contracts. Keep executable code completely untouched.
 
 ## Architecture Decisions
-- **Styling Rules**:
-  - Main headings must be formatted strictly as **Bold**, *Italic*, and <u>Underlined</u>.
-  - Zero colored text or colored table cells: 100% black font (`RGBColor(0, 0, 0)`), white cell backgrounds, standard clean borders.
-- **Section Layout**:
-  1. **Table of Contents**: Bulleted headings and subheadings with dotted leaders (`.................................1`, `..............................2`).
-  2. **Introduction**: 1 single concise paragraph in simple, accessible terms.
-  3. **Problem Statement**: Exactly 1 paragraph of 4 lines defining the problem.
-  4. **Requirements**:
-     - Subheading 1: *Functional Requirements* — 2-column table (`Requirement` | `Description`) populated verbatim from `expert-system.md`.
-     - Subheading 2: *Non-Functional Requirements* — 2-column table (`Requirement` | `Description`) populated verbatim from `expert-system.md`.
-  5. **High Level Design**: Section heading present, body space left empty for user.
-  6. **Code Explanation**: Section heading present, body space left empty for user.
-  7. **Results**: Section heading present, body space left empty for user.
-  8. **Summary**: Exactly 1 paragraph of 5 lines summarizing the agricultural expert system.
-- **Tooling**: Use `python-docx` installed into `.venv` via pip to generate the `.docx` artifact.
+- Scope Guardrail: Modify comment lines and inline comments only. Never change executable code, logic, variable names, imports, or whitespace formatting.
+- Preservation Rule: Maintain docstrings with actual specifications, rule explanations, and critical constraints (e.g., PHI lockouts, CF calculations).
+- Targeted Patterns:
+  - Banners: `# ============================================================================`
+  - Empty Labels: `# Metrics row`, `# Header`, `# Tabs`, `# Certainty factor visual meter`
+  - Workflow Narration: `# Step 1...`, trivial `# Retrieve crop-specific symptoms`
 
 ## Task List
 
-### Phase 1: Environment & Script Setup
-- [x] Task 1: Install `python-docx` into `.venv` and verify import.
-- [x] Task 2: Write generation script `scripts/generate_docx_report.py` implementing exact document structure, black-only tables, and dotted TOC.
+### Phase 1: Core Engine & Domain Models
+- [x] Task 1: Audit and clean comments in `knowledge_base.py` and `working_memory.py`
+- [x] Task 2: Audit and clean comments in `inference_engine.py` and `explanation_module.py`
 
-### Checkpoint 1: Generation & File Validation
-- [x] Script executes without errors and generates `Project_Report_Expert_System.docx`.
-- [x] Automated inspection verifies all headings, tables, line counts, and styling constraints.
+### Checkpoint: Engine Integrity
+- [x] Run test suite `.venv/bin/pytest` to ensure 100% test pass and zero behavioral regression
+
+### Phase 2: Application UI & Tests
+- [x] Task 3: Audit and clean comments in `app.py`
+- [x] Task 4: Audit and clean comments in `tests/test_rules.py` and `tests/test_ui.py`
+
+### Checkpoint: Final Verification
+- [x] All 34 tests pass via `.venv/bin/pytest`
+- [x] Diff inspection confirms zero executable code changes (only `#` comment lines edited or deleted)
+- [x] Checklist in `antislop-code` satisfied
 
 ## Risks and Mitigations
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| Colored table headers or styling defaults | High | Explicitly set font colors to black and disable shaded header fills in python-docx table styles. |
-| Text length mismatch on Problem Statement / Summary | Med | Pre-compose exact 4-line and 5-line paragraph texts and verify sentence boundaries. |
+| Accidental removal of essential domain constraints | Medium | Strict check against `antislop-code` "Not a Ban" list before deleting any non-banner comment. |
+| Code formatting or whitespace disruption | Low | Only remove or trim comment tokens; run pytest after every phase. |
+
+## Open Questions
+- None. Scope confirmed.

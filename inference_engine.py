@@ -36,7 +36,6 @@ class InferenceEngine:
         matched_candidates: List[Tuple[Rule, float, Dict[str, Any]]] = []
         partial_candidates: List[Tuple[Rule, float, float, Dict[str, Any]]] = []
 
-        # 1. Match cycle: find all satisfying rules; collect partial matches too
         for rule in self.rules:
             if rule.category != category:
                 continue
@@ -46,11 +45,9 @@ class InferenceEngine:
 
             matches, fired_conds = self._check_conditions(rule.conditions, memory)
             if matches:
-                # Calculate combined certainty
                 cf = self._compute_certainty(rule, memory)
                 matched_candidates.append((rule, cf, fired_conds))
             else:
-                # Attempt partial match scoring
                 match_ratio, partial_fired = self._partial_match_score(
                     rule.conditions, memory
                 )
@@ -61,14 +58,12 @@ class InferenceEngine:
 
         elapsed_ms = (time.perf_counter() - start_time) * 1000
 
-        # 2. If full matches exist, use them directly
         if matched_candidates:
             return self._build_result(
                 matched_candidates, memory, category, crop, elapsed_ms,
                 is_partial=False
             )
 
-        # 3. Fallback: promote best partial match when no exact match exists
         if partial_candidates:
             promoted = self._promote_partial_candidates(partial_candidates)
             return self._build_result(
@@ -76,7 +71,7 @@ class InferenceEngine:
                 is_partial=True
             )
 
-        # 4. System Boundary Check: No rules fired at all (not even partially)
+        # Boundary fallback: no rules matched even partially
         trace = ExplanationTrace(
             rule_id="NO_MATCH",
             rule_type=RuleType.HARDCODED,
@@ -102,7 +97,6 @@ class InferenceEngine:
             limitation_notice="Expert system limitation reached: Provided signs are unmapped."
         )
 
-        # Delegate to shared result builder
         return self._build_result(
             matched_candidates, memory, category, crop, elapsed_ms,
             is_partial=False
@@ -119,19 +113,16 @@ class InferenceEngine:
     ) -> InferenceResult:
         """Build InferenceResult from matched (or partially matched) candidates."""
 
-        # Conflict Resolution & Rule Extension Escalation
         selected_rule, final_cf, fired_conds = self._resolve_conflicts(
             matched_candidates, is_partial=is_partial
         )
 
-        # Log rule firing in working memory
         memory.log_rule_firing(
             rule_id=selected_rule.rule_id,
             rule_type=selected_rule.rule_type.value,
             details={"conditions": fired_conds, "certainty": final_cf}
         )
 
-        # Construct Explanation Trace
         limitation_msg = None
         if is_partial:
             limitation_msg = (
@@ -150,7 +141,6 @@ class InferenceEngine:
             limitations=limitation_msg
         )
 
-        # Extract Diagnosis and Remedies
         conc = selected_rule.conclusion
         diagnosis = (
             conc.get("name")

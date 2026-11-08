@@ -14,7 +14,6 @@ from inference_engine import InferenceEngine
 from working_memory import WorkingMemory
 from explanation_module import ExplanationModule
 
-# Page Configuration
 st.set_page_config(
     page_title="Pakistan Agriculture Expert System",
     layout="wide",
@@ -22,7 +21,6 @@ st.set_page_config(
 )
 
 
-# Cached resource initialization
 @st.cache_resource
 def get_system_components() -> Tuple[InferenceEngine, ExplanationModule]:
     """Initialize rule engine and explanation module once for session."""
@@ -131,7 +129,6 @@ def render_explanation_expander(
             st.caption(f"System boundary: {limits}")
 
 
-# Crop Display Mapping
 CROPS_DISPLAY: Dict[str, str] = {
     "wheat": "Wheat",
     "cotton": "Cotton",
@@ -140,7 +137,6 @@ CROPS_DISPLAY: Dict[str, str] = {
     "maize": "Maize",
 }
 
-# Symptom Dictionaries per Crop
 CROP_SYMPTOMS: Dict[str, Dict[str, str]] = {
     "wheat": {
         "yellow_pustules_stripes": "Yellow powdery pustules in parallel stripes on leaves (Stripe Rust)",
@@ -187,20 +183,17 @@ WEATHER_CONDITIONS: Dict[str, str] = {
 }
 
 
-# Header
 st.title("Pakistan Agriculture Expert System")
 st.caption(
     "Automated Agronomy Expert System for Major Crops: "
     "Wheat, Cotton, Rice, Sugarcane, and Maize."
 )
 
-# Sidebar System Health & Architecture Info
 with st.sidebar:
     st.header("Expert System")
     st.metric(label="Loaded rules", value=len(RULES))
     st.metric(label="Targeted crops", value=5)
 
-    # Knowledge Base Domain Composition Chart
     st.subheader("Knowledge base distribution")
     rules_data = [
         {"Domain": r.category.value.title(), "Crop": r.crop.title()}
@@ -225,7 +218,6 @@ with st.sidebar:
     
 
 
-# Tabs
 tab_disease, tab_pest, tab_nutrient = st.tabs([
     "1. Crop Disease Identification",
     "2. Pest identification",
@@ -233,9 +225,6 @@ tab_disease, tab_pest, tab_nutrient = st.tabs([
 ])
 
 
-# ============================================================================
-# TAB 1: DISEASE IDENTIFICATION
-# ============================================================================
 with tab_disease:
     st.subheader("Crop disease identification and management")
     st.info(
@@ -263,7 +252,6 @@ with tab_disease:
                 on_change=_reset_disease_on_crop_change
             )
 
-            # Retrieve crop-specific symptoms
             available_symptoms = CROP_SYMPTOMS.get(selected_crop_key, {})
             selected_symptom_keys = st.multiselect(
                 "Select observed symptoms",
@@ -333,19 +321,14 @@ with tab_disease:
                     else:
                         st.success(f"### {result.diagnosis}", icon=":material/check_circle:")
 
-                    # Metrics row
                     m1, m2, m3 = st.columns(3)
                     m1.metric("Certainty score", f"{result.confidence}%")
                     m2.metric("Severity", result.details.get("severity", "Moderate"))
                     m3.metric("Latency", f"{latency:.2f} ms")
 
-                    # Certainty factor visual meter
                     render_confidence_meter(result.confidence)
-
-                    # Rule Category Badge
                     render_modality_badge(result.details.get("rule_type", "hardcoded"), result.confidence)
 
-                    # Treatment Remedies
                     st.markdown("##### Prescribed remedies and agronomic treatments:")
                     for idx, remedy in enumerate(result.remedies, 1):
                         st.markdown(f"**{idx}.** {remedy}")
@@ -367,9 +350,6 @@ with tab_disease:
                 st.caption("Select crop symptoms on the left and click **Diagnose disease** to view findings.")
 
 
-# ============================================================================
-# TAB 2: PEST IDENTIFICATION & PRE-HARVEST SAFETY GUARD
-# ============================================================================
 with tab_pest:
     st.subheader("Crop pest identification and integrated pest management (IPM)")
     st.info(
@@ -520,16 +500,12 @@ with tab_pest:
                     p2.metric("Severity tier", pest_result.details.get("severity_tier", "Moderate"))
                     p3.metric("Latency", f"{latency:.2f} ms")
 
-                    # Certainty factor visual meter
                     render_confidence_meter(pest_result.confidence)
-
-                    # Rule Category Badge
                     render_modality_badge(
                         "partial" if pest_result.details.get("match_type") == "partial" else pest_result.details.get("rule_type", "hardcoded"),
                         pest_result.confidence
                     )
 
-                    # Pre-Harvest Lockout Warning Callout
                     if pest_result.chemical_blocked:
                         st.error(
                             "**PRE-HARVEST SAFETY LOCKOUT TRIGGERED:**\n\n"
@@ -539,7 +515,6 @@ with tab_pest:
                             icon=":material/gavel:"
                         )
 
-                    # Biological Controls Column vs Chemical Insecticides
                     st.markdown("##### Biological and cultural controls:")
                     bio_remedies = [r for r in pest_result.remedies if "BLOCKED" not in r and "SAFETY WARNING" not in r and "EC" not in r and "SC" not in r and "SL" not in r and "WG" not in r and "4G" not in r and "3G" not in r]
                     for b in bio_remedies:
@@ -565,9 +540,6 @@ with tab_pest:
 
 
 
-# ============================================================================
-# TAB 3: NUTRIENT DEFICIENCY & FERTILIZER PRESCRIPTION
-# ============================================================================
 with tab_nutrient:
     st.subheader("Nutrient deficiency identification and fertilizer prescription")
     st.info(
@@ -637,7 +609,6 @@ with tab_nutrient:
                 key="nut_ph_slider"
             )
 
-            # Interactive Soil pH Indicator & Spectrum Chart
             render_soil_ph_spectrum(soil_ph)
 
             if soil_ph < 5.5:
@@ -689,7 +660,6 @@ with tab_nutrient:
                         st.warning(f"### Deficiency identified: {nut_result.diagnosis}", icon=":material/help:")
                         st.caption(nut_result.limitation_notice)
                     else:
-                        # Missing nutrient badge (as specified: st.info("Deficiency: ..."))
                         st.info(f"### Deficiency identified: {nut_result.diagnosis}", icon=":material/science:")
 
                     n1, n2, n3 = st.columns(3)
@@ -697,24 +667,18 @@ with tab_nutrient:
                     n2.metric("Soil pH", f"{recorded_ph}")
                     n3.metric("Latency", f"{latency:.2f} ms")
 
-                    # Certainty factor visual meter
                     render_confidence_meter(nut_result.confidence)
-
-                    # Rule Category Badge
                     render_modality_badge(
                         "partial" if nut_result.details.get("match_type") == "partial" else nut_result.details.get("rule_type", "hardcoded"),
                         nut_result.confidence
                     )
 
-                    # Prescribed NPK fertilizer dosage card
                     st.markdown("##### Prescribed NPK and soil remediation schedule:")
                     for idx, rem in enumerate(nut_result.remedies, 1):
                         st.markdown(f"- **{rem}**")
 
-                    # NPK Application Rate Chart
                     render_npk_dosage_chart(nut_result.remedies, nut_crop_key)
 
-                    # Recovery timeline estimate (as specified: st.caption("Expected foliage recovery: ..."))
                     timeline_val = nut_result.details.get("recovery_timeline", "7-14 days")
                     st.caption(f"**Expected foliage recovery timeline:** {timeline_val}")
 

@@ -73,12 +73,8 @@ class InferenceResult:
     limitation_notice: Optional[str] = None
 
 
-# Comprehensive 55+ Rules for Pakistani Agricultural Ecosystem
 RULES: List[Rule] = [
-    # ==========================================
-    # 1. WHEAT (Gandum) RULES
-    # ==========================================
-    # Wheat Diseases
+    # Wheat
     Rule(
         rule_id="W-DIS-001",
         category=Category.DISEASE,
@@ -194,10 +190,7 @@ RULES: List[Rule] = [
         explanation="Interveinal pale bleaching of middle leaves in high pH soils points strongly to zinc unavailability."
     ),
 
-    # ==========================================
-    # 2. COTTON (Kapas) RULES
-    # ==========================================
-    # Cotton Diseases
+    # Cotton
     Rule(
         rule_id="C-DIS-001",
         category=Category.DISEASE,
@@ -323,10 +316,7 @@ RULES: List[Rule] = [
         explanation="Reddish-purple pigmentation between veins on mature leaves during flowering points to magnesium deficiency."
     ),
 
-    # ==========================================
-    # 3. RICE (Dhan) RULES
-    # ==========================================
-    # Rice Diseases
+    # Rice
     Rule(
         rule_id="R-DIS-001",
         category=Category.DISEASE,
@@ -442,10 +432,7 @@ RULES: List[Rule] = [
         explanation="Dark green plants with scorched leaf tips and poorly filled panicle bases denote inadequate potassium."
     ),
 
-    # ==========================================
-    # 4. SUGARCANE (Kamad) RULES
-    # ==========================================
-    # Sugarcane Diseases
+    # Sugarcane
     Rule(
         rule_id="S-DIS-001",
         category=Category.DISEASE,
@@ -561,10 +548,7 @@ RULES: List[Rule] = [
         explanation="Complete bleached whitening of newly emerged top spindle leaves in high alkaline calcareous soils denotes iron chlorosis."
     ),
 
-    # ==========================================
-    # 5. MAIZE (Makai) RULES
-    # ==========================================
-    # Maize Diseases
+    # Maize
     Rule(
         rule_id="M-DIS-001",
         category=Category.DISEASE,
@@ -680,9 +664,7 @@ RULES: List[Rule] = [
         explanation="Broad bleached bands of white or pale yellow on both sides of the leaf midrib with emergence of stunted white new leaves ('white bud')."
     ),
 
-    # ==========================================
-    # 6. UNIVERSAL SOIL pH REMEDIATION & EXTENDED DEFICIENCIES
-    # ==========================================
+    # Universal soil remediation
     Rule(
         rule_id="ALL-NUT-001",
         category=Category.NUTRIENT,

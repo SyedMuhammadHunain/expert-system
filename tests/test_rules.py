@@ -39,10 +39,6 @@ def memory() -> WorkingMemory:
     return WorkingMemory()
 
 
-# ============================================================================
-# 1. ACADEMIC RUBRIC & KNOWLEDGE BASE VERIFICATIONS
-# ============================================================================
-
 def test_rule_count_minimum():
     """Instructor requirement: Minimum 50 rules."""
     assert len(RULES) >= 50, f"Expected at least 50 rules, found {len(RULES)}"
@@ -81,10 +77,6 @@ def test_rule_modalities():
         assert r.extended_from is not None, f"Extended rule {r.rule_id} must cite extended_from"
 
 
-# ============================================================================
-# 2. WORKING MEMORY TESTS
-# ============================================================================
-
 def test_working_memory_state_operations(memory: WorkingMemory):
     memory.assert_fact("crop", "wheat")
     memory.assert_fact("stage", "flowering", confidence=0.85)
@@ -104,10 +96,6 @@ def test_working_memory_state_operations(memory: WorkingMemory):
     assert len(memory.all_facts()) == 0
     assert len(memory.get_fired_rules()) == 0
 
-
-# ============================================================================
-# 3. DISEASE IDENTIFICATION TESTS
-# ============================================================================
 
 def test_disease_wheat_yellow_rust(engine: InferenceEngine, memory: WorkingMemory):
     memory.assert_fact("crop", "wheat")
@@ -161,10 +149,6 @@ def test_disease_maize_turcicum(engine: InferenceEngine, memory: WorkingMemory):
     assert "Northern Corn Leaf Blight" in res.diagnosis
 
 
-# ============================================================================
-# 4. PEST MANAGEMENT & PRE-HARVEST SAFETY TESTS
-# ============================================================================
-
 def test_pest_cotton_pink_bollworm(engine: InferenceEngine, memory: WorkingMemory):
     memory.assert_fact("crop", "cotton")
     memory.assert_fact("plant_zone", "fruit")
@@ -191,10 +175,6 @@ def test_pest_pre_harvest_safety_lockout(engine: InferenceEngine, memory: Workin
     assert res.chemical_blocked is True
     assert any("SAFETY WARNING" in r or "BLOCKED" in r for r in res.remedies)
 
-
-# ============================================================================
-# 5. NUTRIENT DEFICIENCY & SOIL pH TESTS
-# ============================================================================
 
 def test_soil_acidity_lime_fix(engine: InferenceEngine, memory: WorkingMemory):
     memory.assert_fact("crop", "all")
@@ -226,10 +206,6 @@ def test_nutrient_rice_khaira_zinc(engine: InferenceEngine, memory: WorkingMemor
     assert res.success is True
     assert "Zinc" in res.diagnosis
 
-
-# ============================================================================
-# 6. EXPLANATION & SYSTEM BOUNDARY TESTS
-# ============================================================================
 
 def test_system_knows_its_limitations(
     engine: InferenceEngine, explainer: ExplanationModule, memory: WorkingMemory

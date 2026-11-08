@@ -15,7 +15,6 @@ class ExplanationModule:
         """Generate a complete structured explanation report for UI and viva audit."""
         steps: List[Dict[str, str]] = []
 
-        # 1. Input observations step
         facts_summary = []
         if memory:
             for k, f in memory.all_facts().items():
@@ -27,7 +26,6 @@ class ExplanationModule:
             "detail": f"Observed facts for {result.crop.title()}: {input_desc}."
         })
 
-        # 2. Rule evaluation and modality
         if not result.success:
             steps.append({
                 "step": "2. Knowledge Base Search",
@@ -49,7 +47,6 @@ class ExplanationModule:
                 "rule_type": "None"
             }
 
-        # Success path
         primary_trace = result.traces[0] if result.traces else None
         rule_type_val = result.details.get("rule_type", "hardcoded")
         is_partial = result.details.get("match_type") == "partial"
@@ -73,14 +70,12 @@ class ExplanationModule:
             "detail": f"Fired Rule [{result.details.get('rule_id', 'UNKNOWN')}]: {modality_text}"
         })
 
-        # 3. Reasoning Chain
         reasoning = primary_trace.reasoning if primary_trace else "Conditions satisfied."
         steps.append({
             "step": "3. Agronomic Decision Chain",
             "detail": reasoning
         })
 
-        # 4. Safety & Remedy rationale
         if result.chemical_blocked:
             steps.append({
                 "step": "4. Safety Guard Override",
