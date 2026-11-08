@@ -57,11 +57,11 @@
 ## Task 4: Add Automated UI Regression Tests for Single-Symptom Scenarios
 **Description:** Add headless Streamlit AppTests in `tests/test_ui.py` simulating a user selecting exactly 1 symptom with default weather across crops to guarantee no unexpected "Unknown Condition" failure.
 **Acceptance criteria:**
-- [ ] AppTest simulates single-symptom selection (e.g., cotton `leaf_curling_upward`) and asserts valid diagnosis is rendered.
-- [ ] AppTest tests pest tab with only 1 visible damage selected.
-- [ ] All 26+ tests pass cleanly.
+- [x] AppTest simulates single-symptom selection (e.g., wheat `yellow_pustules_stripes` without cool_humid weather) and asserts valid diagnosis is rendered.
+- [x] AppTest tests pest tab with only 1 visible damage selected.
+- [x] All 32 tests pass cleanly.
 **Verification:**
-- [ ] `pytest -v tests/` completes in < 3s with 100% passing tests.
+- [x] `pytest -v tests/` completes in < 3s with 100% passing tests.
 **Dependencies:** Task 3
 **Files likely touched:**
 - `tests/test_ui.py`
@@ -70,6 +70,6 @@
 ---
 
 ## Checkpoint 2: Complete System Verification
-- [ ] Full test suite green (`pytest -v tests/`)
-- [ ] Single-symptom inputs reliably produce actionable advice
-- [ ] Code committed and pushed to git
+- [x] Full test suite green (`pytest -v tests/`)
+- [x] Single-symptom inputs reliably produce actionable advice
+- [x] Code committed and pushed to git

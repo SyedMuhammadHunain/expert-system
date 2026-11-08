@@ -106,3 +106,39 @@ def test_visual_charts_render_cleanly():
     at.selectbox("nut_discoloration_select").select("lower_leaves_yellowing")
     at.button[2].click().run(timeout=10)
     assert not at.exception
+
+
+def test_disease_tab_single_symptom_partial_match():
+    """Verify single symptom input for a multi-condition rule returns a partial diagnosis, not Unknown Condition."""
+    at = AppTest.from_file("../app.py")
+    at.run(timeout=10)
+
+    # Wheat Yellow Rust requires ["yellow_pustules_stripes"] + "cool_humid" weather
+    # Selecting only the symptom with default normal weather previously returned "Unknown Condition".
+    # With partial matching, it returns a Possible diagnosis with calibrated CF.
+    at.multiselect("dis_symptoms_select").select("yellow_pustules_stripes")
+    at.button[0].click().run(timeout=10)
+
+    assert not at.exception
+    warning_texts = [w.value for w in at.warning]
+    assert any("Yellow Rust" in w for w in warning_texts)
+    assert any("Possible" in w for w in warning_texts)
+    # Check that it did NOT trigger the 'Unknown Condition' boundary message
+    assert not any("Unknown Condition" in w for w in warning_texts)
+
+
+def test_pest_tab_single_damage_partial_match():
+    """Verify pest tab with only zone and damage (no sighting) provides a partial diagnosis."""
+    at = AppTest.from_file("../app.py")
+    at.run(timeout=10)
+
+    at.selectbox("pest_crop_select").select("wheat")
+    at.selectbox("pest_zone_select").select("leaves")
+    at.multiselect("pest_damage_multiselect").select("sticky_honeydew")
+    # Leave sightings as default none_seen
+    at.button[1].click().run(timeout=10)
+
+    assert not at.exception
+    warning_texts = [w.value for w in at.warning]
+    assert any("Aphid" in w for w in warning_texts)
+    assert not any("Unknown" in w for w in warning_texts)
