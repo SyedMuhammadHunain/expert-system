@@ -52,8 +52,14 @@ class ExplanationModule:
         # Success path
         primary_trace = result.traces[0] if result.traces else None
         rule_type_val = result.details.get("rule_type", "hardcoded")
+        is_partial = result.details.get("match_type") == "partial"
 
-        if rule_type_val == RuleType.HARDCODED.value:
+        if is_partial:
+            modality_text = (
+                f"Partial Rule Match (Certainty Factor = {result.confidence}% — incomplete condition footprint. "
+                "Provided symptoms partially satisfied the rule premise)."
+            )
+        elif rule_type_val == RuleType.HARDCODED.value:
             modality_text = "Hardcoded Rule (100% Deterministic match — exact textbook agronomy pattern)."
         elif rule_type_val == RuleType.MAY_OR_MAY_NOT.value:
             modality_text = f"Probabilistic Rule (Certainty Factor = {result.confidence}% — partial symptom footprint)."
@@ -89,10 +95,16 @@ class ExplanationModule:
                 "detail": f"Prescribed {len(result.remedies)} recommended management practices."
             })
 
-        limitations_text = (
-            "System boundary: Diagnosis applies specifically to irrigated Indus Basin cropping conditions. "
-            "Severe anomalies or secondary infections require soil test lab confirmation."
-        )
+        if is_partial:
+            limitations_text = (
+                result.limitation_notice
+                or "Partial match: Missing corroborating field symptoms. Verify additional signs before chemical treatment."
+            )
+        else:
+            limitations_text = (
+                "System boundary: Diagnosis applies specifically to irrigated Indus Basin cropping conditions. "
+                "Severe anomalies or secondary infections require soil test lab confirmation."
+            )
 
         return {
             "success": True,
@@ -100,5 +112,5 @@ class ExplanationModule:
             "steps": steps,
             "limitations": limitations_text,
             "safety_lock": result.chemical_blocked,
-            "rule_type": rule_type_val
+            "rule_type": "partial" if is_partial else rule_type_val
         }

@@ -20,11 +20,11 @@
 ## Task 2: Refine Explanation Trace & Boundary Explanations
 **Description:** Enhance `ExplanationTrace` generation for partial matches so the user sees which conditions matched, which conditions were missing, and specific next observational steps.
 **Acceptance criteria:**
-- [ ] Trace includes an explicit limitation notice for partial matches.
-- [ ] Diagnosis string appends `(Possible)` to prevent overconfidence.
-- [ ] `remedies` are preserved and include advice to inspect missing symptoms.
+- [x] Trace includes an explicit limitation notice for partial matches.
+- [x] Diagnosis string appends `(Possible)` to prevent overconfidence.
+- [x] `remedies` are preserved and include advice to inspect missing symptoms.
 **Verification:**
-- [ ] Unit tests verify `res.limitation_notice` is populated on partial match.
+- [x] Unit tests verify `res.limitation_notice` is populated on partial match.
 **Dependencies:** Task 1
 **Files likely touched:**
 - `inference_engine.py`

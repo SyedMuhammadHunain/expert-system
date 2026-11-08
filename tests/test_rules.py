@@ -326,6 +326,23 @@ def test_passive_facts_alone_do_not_trigger_partial_match(
     assert "Unknown" in res.diagnosis
 
 
+def test_explanation_module_partial_match(
+    engine: InferenceEngine, explainer: ExplanationModule, memory: WorkingMemory
+):
+    """Verify ExplanationModule produces specific partial match reasoning steps."""
+    memory.assert_fact("crop", "cotton")
+    memory.assert_fact("symptoms", ["leaf_curling_upward"])
+
+    res = engine.evaluate(memory, Category.DISEASE)
+    assert res.success is True
+
+    exp = explainer.explain(res, memory)
+    assert exp["success"] is True
+    assert exp["rule_type"] == "partial"
+    assert "Partial Rule Match" in exp["steps"][1]["detail"]
+    assert exp["limitations"] is not None
+
+
 def test_inference_latency_benchmark(engine: InferenceEngine, memory: WorkingMemory):
     """Instructor requirement: Inference engine evaluates rule chain in < 1.0 second."""
     memory.assert_fact("crop", "wheat")
