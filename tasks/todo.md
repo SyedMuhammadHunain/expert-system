@@ -18,11 +18,11 @@
 ## Task 2: Refactor Tab 2 (Pest) and Tab 3 (Nutrient) to Reactive Containers
 **Description:** Replace `st.form("pest_form")` and `st.form("nutrient_form")` with `st.container(border=True)` and standard `st.button`. Reset previous diagnostic results and dependent inputs when the target crop changes.
 **Acceptance criteria:**
-- [ ] Tab 2 (Pest) switches reactively without requiring hard refresh; changing crop resets previous results and checklist selections.
-- [ ] Tab 3 (Nutrient) switches reactively; target crop change updates recommendation context immediately.
-- [ ] Action buttons `Identify pest and retrieve IPM advisory` and `Prescribe fertilizer and soil remediation` execute cleanly as standard buttons.
+- [x] Tab 2 (Pest) switches reactively without requiring hard refresh; changing crop resets previous results and checklist selections.
+- [x] Tab 3 (Nutrient) switches reactively; target crop change updates recommendation context immediately.
+- [x] Action buttons `Identify pest and retrieve IPM advisory` and `Prescribe fertilizer and soil remediation` execute cleanly as standard buttons.
 **Verification:**
-- [ ] `pytest tests/test_ui.py` passes all existing test cases.
+- [x] `pytest tests/test_ui.py` passes all existing test cases.
 **Dependencies:** Task 1
 **Files likely touched:**
 - `app.py`
@@ -31,8 +31,8 @@
 ---
 
 ## Checkpoint 1: Reactive Container Migration
-- [ ] Tab 1, 2, and 3 use `st.container(border=True)` instead of `st.form`.
-- [ ] All 32 automated tests pass (`pytest -v tests/`).
+- [x] Tab 1, 2, and 3 use `st.container(border=True)` instead of `st.form`.
+- [x] All 32 automated tests pass (`pytest -v tests/`).
 
 ---
 

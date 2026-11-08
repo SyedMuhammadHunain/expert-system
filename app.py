@@ -380,15 +380,20 @@ with tab_pest:
 
     col_pest_in, col_pest_out = st.columns([1, 1], gap="medium")
 
+    def _reset_pest_on_crop_change() -> None:
+        st.session_state.pop("pest_result", None)
+        st.session_state.pop("pest_error", None)
+
     with col_pest_in:
-        with st.form("pest_form", border=True):
+        with st.container(border=True):
             st.markdown("#### Pest observation form")
             pest_crop_key = st.selectbox(
                 "Select crop",
                 options=list(CROPS_DISPLAY.keys()),
                 format_func=lambda k: CROPS_DISPLAY[k],
                 help="Select the host crop experiencing pest feeding or infestation.",
-                key="pest_crop_select"
+                key="pest_crop_select",
+                on_change=_reset_pest_on_crop_change
             )
 
             plant_zone = st.selectbox(
@@ -458,7 +463,7 @@ with tab_pest:
                 key="pest_harvest_toggle"
             )
 
-            diagnose_pest_btn = st.form_submit_button(
+            diagnose_pest_btn = st.button(
                 "Identify pest and retrieve IPM advisory",
                 icon=":material/security:",
                 width="stretch",
@@ -573,8 +578,11 @@ with tab_nutrient:
 
     col_nut_in, col_nut_out = st.columns([1, 1], gap="medium")
 
+    def _reset_nutrient_on_crop_change() -> None:
+        st.session_state.pop("nut_result", None)
+
     with col_nut_in:
-        with st.form("nutrient_form", border=True):
+        with st.container(border=True):
             st.markdown("#### Soil and foliage input form")
 
             nut_crop_options = ["all"] + list(CROPS_DISPLAY.keys())
@@ -583,7 +591,8 @@ with tab_nutrient:
                 options=nut_crop_options,
                 format_func=lambda k: "All crops / universal soil check" if k == "all" else CROPS_DISPLAY[k],
                 help="Select target crop or choose universal check for general soil pH guidance.",
-                key="nut_crop_select"
+                key="nut_crop_select",
+                on_change=_reset_nutrient_on_crop_change
             )
 
             crop_stage = st.selectbox(
@@ -638,7 +647,7 @@ with tab_nutrient:
             else:
                 st.success(f"Soil status: Optimal / moderately alkaline (pH {soil_ph}) — Standard Indus plain range.", icon=":material/check_circle:")
 
-            diagnose_nut_btn = st.form_submit_button(
+            diagnose_nut_btn = st.button(
                 "Prescribe fertilizer and soil remediation",
                 icon=":material/science:",
                 width="stretch",
