@@ -1,96 +1,75 @@
-# Tasks: UI Professionalization, Accessibility & Visualization
+# Tasks: Partial-Matching Fallback & Single-Symptom Resolution
 
-## Task 1: Complete Emoji Removal from UI & Code
-**Description:** Remove every emoji character (e.g., 🌾, 🔬, 🐛, 🌱, 📋, 🔍, 🩺, 🚨, 🛑, 📦, ⏱️, ⚙️, 🔖, 🔎) from `app.py`, page config, headers, tab labels, form buttons, expanders, and cards. Replace with clean textual indicators or native Streamlit material icons (`:material/...:`).
+## Task 1: Complete Partial-Matching Scoring in Inference Engine
+**Description:** Ensure `_partial_match_score` in `inference_engine.py` handles all condition keys correctly (`symptoms`, `weather`, `plant_zone`, `damage`, `sightings`, `discoloration`, `stage`, `ph_min`, `ph_max`). Return proportional match ratio and captured conditions.
 **Acceptance criteria:**
-- [x] `st.set_page_config` uses no emoji icon (clean SVG or title).
-- [x] Tab titles contain no emojis: `1. Crop Disease Diagnosis`, `2. Pest Management & Safety Lock`, `3. Soil Chemistry & Fertilizer Prescription`.
-- [x] All button labels, card headers, and expander titles are free of emojis.
-- [x] Regex check confirms 0 emojis in `app.py`.
+- [x] Disease rules with 2+ conditions fire as partial matches when 1 symptom is asserted.
+- [x] Pest rules fire as partial matches when only plant zone and 1 damage sign or 1 sighting is asserted.
+- [x] Nutrient rules fire as partial matches when only discoloration is asserted without specific pH.
+- [x] Partial CF is scaled proportionally and hard-capped at 0.50 (50%).
 **Verification:**
-- [x] Python unicode regex test confirms zero emoji characters in `app.py`.
-- [x] `pytest -v tests/` passes.
+- [x] `pytest tests/test_rules.py` passes with dedicated partial matching assertions.
 **Dependencies:** None
 **Files likely touched:**
-- `app.py`
-**Estimated scope:** Small (1 file)
+- `inference_engine.py`
+- `tests/test_rules.py`
+**Estimated scope:** Small (2 files)
 
 ---
 
-## Task 2: Complete Urdu Language & Transliteration Purge
-**Description:** Remove all Urdu script (`[\u0600-\u06ff]`) and romanized Urdu terms (e.g., `Gandum`, `Kapas`, `Dhan`, `Kamad`, `Makai`, `Peeli Kungi`, `Bhoori Kungi`, `Kani`, `تشخیص کریں`) from `app.py`. Standardize all labels and symptoms into precise agronomic English and accepted scientific nomenclature.
+## Task 2: Refine Explanation Trace & Boundary Explanations
+**Description:** Enhance `ExplanationTrace` generation for partial matches so the user sees which conditions matched, which conditions were missing, and specific next observational steps.
 **Acceptance criteria:**
-- [x] Crop dropdown labels use clean English: `Wheat`, `Cotton`, `Rice`, `Sugarcane`, `Maize`.
-- [x] Symptom dictionary values use standard pathological and anatomical English descriptions.
-- [x] UI title, sidebar, headers, and form inputs contain 0 Urdu characters or transliterations.
+- [ ] Trace includes an explicit limitation notice for partial matches.
+- [ ] Diagnosis string appends `(Possible)` to prevent overconfidence.
+- [ ] `remedies` are preserved and include advice to inspect missing symptoms.
 **Verification:**
-- [x] Python unicode regex confirms 0 characters in range `\u0600-\u06ff` in `app.py`.
-- [x] `pytest -v tests/` passes.
+- [ ] Unit tests verify `res.limitation_notice` is populated on partial match.
 **Dependencies:** Task 1
 **Files likely touched:**
+- `inference_engine.py`
+- `tests/test_rules.py`
+**Estimated scope:** Small (2 files)
+
+---
+
+## Checkpoint 1: Engine Logic Verification
+- [ ] Unit tests pass: `pytest -v tests/test_rules.py`
+- [ ] Latency remains < 10ms
+
+---
+
+## Task 3: Update Streamlit UI for Partial Confidence Feedback
+**Description:** Update `app.py` diagnostic cards (Disease, Pest, and Nutrient tabs) to render a distinct status banner (`st.warning` with informative caption) when `result.limitation_notice` indicates a partial match.
+**Acceptance criteria:**
+- [ ] Tab 1 (Disease) shows an alert and guidance when a partial match is diagnosed.
+- [ ] Tab 2 (Pest) handles partial pest matches cleanly with the pre-harvest safety guard intact.
+- [ ] Tab 3 (Nutrient) displays partial deficiency suggestions when only discoloration is provided.
+**Verification:**
+- [ ] Visual verification and test run in `tests/test_ui.py`.
+**Dependencies:** Task 1, 2
+**Files likely touched:**
 - `app.py`
 **Estimated scope:** Small (1 file)
 
 ---
 
-## Checkpoint 1: Visual & Text Sanitization
-- [x] Zero emojis in `app.py`
-- [x] Zero Urdu script in `app.py`
-- [x] Automated tests pass (`pytest -v tests/`)
-
----
-
-## Task 3: Improve Readability & Accessibility (WCAG 2.1 AA)
-**Description:** Enhance visual hierarchy, typography, contrast, and form semantics. Improve helper descriptions, add structured tables/cards for diagnostic outputs, ensure field labels have descriptive help popovers, and optimize color contrast across alert containers (`st.info`, `st.success`, `st.warning`, `st.error`).
+## Task 4: Add Automated UI Regression Tests for Single-Symptom Scenarios
+**Description:** Add headless Streamlit AppTests in `tests/test_ui.py` simulating a user selecting exactly 1 symptom with default weather across crops to guarantee no unexpected "Unknown Condition" failure.
 **Acceptance criteria:**
-- [x] Semantic heading structure (`h1` -> `h2` -> `h3` -> `h4`) throughout.
-- [x] Input widgets feature explicit `help` parameters explaining expected observations to assist screen readers and field users.
-- [x] Prescriptions and chemical lockout warnings use high-contrast, structured callouts with clear visual hierarchy.
+- [ ] AppTest simulates single-symptom selection (e.g., cotton `leaf_curling_upward`) and asserts valid diagnosis is rendered.
+- [ ] AppTest tests pest tab with only 1 visible damage selected.
+- [ ] All 26+ tests pass cleanly.
 **Verification:**
-- [x] Headless UI tests in `tests/test_ui.py` verify all components render cleanly without exceptions.
-**Dependencies:** Tasks 1, 2
-**Files likely touched:**
-- `app.py`
-- `tests/test_ui.py`
-**Estimated scope:** Small (1-2 files)
-
----
-
-## Task 4: Add Sidebar Rule Distribution Chart & Diagnosis Certainty Meter
-**Description:** Implement clean, responsive visual analytics using `altair` and `streamlit`. Add a Knowledge Base composition chart (rule counts by crop and domain category) to the sidebar, and render a Certainty Factor gauge/progress bar in the diagnosis cards for Tabs 1 and 2.
-**Acceptance criteria:**
-- [x] Sidebar displays an Altair horizontal bar chart showing rule distribution across Disease, Pest, and Soil categories.
-- [x] Diagnostic reports in Tab 1 and Tab 2 include a visual Certainty Factor bar with calibrated color bands (e.g. Amber <70%, Green >=70%).
-- [x] Charts are fully responsive and adapt to dark/light modes.
-**Verification:**
-- [x] Chart generation runs in < 5ms without rendering errors.
-- [x] AppTest in `tests/test_ui.py` verifies charts render without exceptions.
+- [ ] `pytest -v tests/` completes in < 3s with 100% passing tests.
 **Dependencies:** Task 3
 **Files likely touched:**
-- `app.py`
 - `tests/test_ui.py`
-**Estimated scope:** Medium (1-2 files)
+**Estimated scope:** Small (1 file)
 
 ---
 
-## Task 5: Add Soil pH Chemistry Spectrum & NPK Dosage Chart
-**Description:** In Tab 3 (Soil & Fertilizer), implement an interactive Soil pH Spectrum Chart (illustrating Acidic, Neutral, and Alkaline zones with an indicator marker for the user's selected pH) and an NPK Macronutrient Recommendation Bar Chart (showing relative kg/acre application rates).
-**Acceptance criteria:**
-- [x] Altair pH spectrum chart visually marks acidic (<6.0), optimal (6.0 - 7.5), and alkaline/calcareous (>7.5) ranges with a pointer at the current soil pH.
-- [x] Diagnostic output in Tab 3 displays an NPK dosage breakdown bar chart when nutrient deficiency is identified.
-- [x] Zero external dependencies added (pure `altair` + `pandas`).
-**Verification:**
-- [x] AppTest tests verify Tab 3 execution with new charts.
-- [x] `pytest -v tests/` passes completely.
-**Dependencies:** Task 4
-**Files likely touched:**
-- `app.py`
-- `tests/test_ui.py`
-**Estimated scope:** Medium (1-2 files)
-
----
-
-## Checkpoint 2: System Sign-Off & Verification
-- [x] 24 automated tests pass (`pytest -v tests/`)
-- [x] Review confirms 0 emojis, 0 Urdu, high readability, and clean responsive charts
-- [x] Changes committed cleanly to git repository
+## Checkpoint 2: Complete System Verification
+- [ ] Full test suite green (`pytest -v tests/`)
+- [ ] Single-symptom inputs reliably produce actionable advice
+- [ ] Code committed and pushed to git

@@ -249,6 +249,83 @@ def test_system_knows_its_limitations(
     assert any("Boundary" in s["step"] for s in exp["steps"])
 
 
+def test_partial_match_single_symptom_for_multi_symptom_rule(
+    engine: InferenceEngine, memory: WorkingMemory
+):
+    """When user provides 1 of 2 required symptoms, engine returns a partial match
+    instead of 'Unknown Condition'."""
+    memory.assert_fact("crop", "cotton")
+    # CLCuV rule C-DIS-001 requires ["leaf_curling_upward", "thickened_veins"]
+    # Providing only one symptom should trigger partial match fallback
+    memory.assert_fact("symptoms", ["leaf_curling_upward"])
+
+    res = engine.evaluate(memory, Category.DISEASE)
+    assert res.success is True
+    assert "Possible" in res.diagnosis
+    assert res.confidence > 0.0
+    assert res.confidence <= 50.0  # Capped at PARTIAL_MATCH_CF_CAP
+    assert res.limitation_notice is not None
+    assert "partial" in res.limitation_notice.lower()
+
+
+def test_partial_match_does_not_override_exact_match(
+    engine: InferenceEngine, memory: WorkingMemory
+):
+    """When an exact match exists, partial match path is not used."""
+    memory.assert_fact("crop", "cotton")
+    memory.assert_fact("symptoms", ["leaf_curling_upward", "thickened_veins"])
+
+    res = engine.evaluate(memory, Category.DISEASE)
+    assert res.success is True
+    assert "Possible" not in res.diagnosis
+    assert res.limitation_notice is None
+
+
+def test_pest_partial_match_damage_without_sighting(
+    engine: InferenceEngine, memory: WorkingMemory
+):
+    """Pest rule requiring zone + damage + sighting still matches partially when only zone + damage provided."""
+    memory.assert_fact("crop", "wheat")
+    memory.assert_fact("plant_zone", "leaves")
+    memory.assert_fact("damage", ["sticky_honeydew"])
+    # Omitting "sightings": "tiny_green_insects"
+
+    res = engine.evaluate(memory, Category.PEST)
+    assert res.success is True
+    assert "Possible" in res.diagnosis
+    assert "Aphid" in res.diagnosis
+    assert res.confidence <= 50.0
+    assert res.limitation_notice is not None
+
+
+def test_nutrient_partial_match_discoloration_without_ph(
+    engine: InferenceEngine, memory: WorkingMemory
+):
+    """Nutrient rule requiring discoloration + pH range matches partially when only discoloration is known."""
+    memory.assert_fact("crop", "wheat")
+    memory.assert_fact("discoloration", "interveinal_chlorosis")
+    memory.assert_fact("stage", "vegetative")
+    # Omitting ph_min/ph_max
+
+    res = engine.evaluate(memory, Category.NUTRIENT)
+    assert res.success is True
+    assert "Possible" in res.diagnosis
+    assert "Zinc" in res.diagnosis
+    assert res.confidence <= 50.0
+
+
+def test_passive_facts_alone_do_not_trigger_partial_match(
+    engine: InferenceEngine, memory: WorkingMemory
+):
+    """Asserting only contextual facts (like plant_zone or stage) with NO symptoms/damage must NOT trigger a false diagnosis."""
+    memory.assert_fact("crop", "cotton")
+    memory.assert_fact("plant_zone", "leaves")
+
+    res = engine.evaluate(memory, Category.PEST)
+    assert res.success is False
+    assert "Unknown" in res.diagnosis
+
+
 def test_inference_latency_benchmark(engine: InferenceEngine, memory: WorkingMemory):
     """Instructor requirement: Inference engine evaluates rule chain in < 1.0 second."""
     memory.assert_fact("crop", "wheat")
