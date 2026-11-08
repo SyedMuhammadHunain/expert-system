@@ -59,12 +59,12 @@
 ## Task 4: Add Sidebar Rule Distribution Chart & Diagnosis Certainty Meter
 **Description:** Implement clean, responsive visual analytics using `altair` and `streamlit`. Add a Knowledge Base composition chart (rule counts by crop and domain category) to the sidebar, and render a Certainty Factor gauge/progress bar in the diagnosis cards for Tabs 1 and 2.
 **Acceptance criteria:**
-- [ ] Sidebar displays an Altair horizontal bar chart showing rule distribution across Disease, Pest, and Soil categories.
-- [ ] Diagnostic reports in Tab 1 and Tab 2 include a visual Certainty Factor bar with calibrated color bands (e.g. Amber <70%, Green >=70%).
-- [ ] Charts are fully responsive and adapt to dark/light modes.
+- [x] Sidebar displays an Altair horizontal bar chart showing rule distribution across Disease, Pest, and Soil categories.
+- [x] Diagnostic reports in Tab 1 and Tab 2 include a visual Certainty Factor bar with calibrated color bands (e.g. Amber <70%, Green >=70%).
+- [x] Charts are fully responsive and adapt to dark/light modes.
 **Verification:**
-- [ ] Chart generation runs in < 5ms without rendering errors.
-- [ ] AppTest in `tests/test_ui.py` verifies charts render without exceptions.
+- [x] Chart generation runs in < 5ms without rendering errors.
+- [x] AppTest in `tests/test_ui.py` verifies charts render without exceptions.
 **Dependencies:** Task 3
 **Files likely touched:**
 - `app.py`

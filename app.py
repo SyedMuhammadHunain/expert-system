@@ -4,7 +4,9 @@ Built for Academic Evaluation and Agricultural Extension.
 """
 
 import time
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
+import altair as alt
+import pandas as pd
 import streamlit as st
 
 from knowledge_base import Category, InferenceResult, RULES
@@ -35,11 +37,17 @@ engine, explainer = get_system_components()
 def render_modality_badge(rule_type: str, confidence: float) -> None:
     """Render informative badge explaining rule modality."""
     if rule_type == "hardcoded":
-        st.caption("**Rule Modality:** Hardcoded Deterministic (100% textbook match)")
+        st.caption("**Rule modality:** Hardcoded deterministic (100% textbook match)")
     elif rule_type == "may_or_may_not":
-        st.caption(f"**Rule Modality:** Probabilistic Inference ({confidence}% Certainty Factor)")
+        st.caption(f"**Rule modality:** Probabilistic inference ({confidence}% Certainty Factor)")
     elif rule_type == "extended":
-        st.caption("**Rule Modality:** Extended Rule (Weather/Harvest/Safety Escalation)")
+        st.caption("**Rule modality:** Extended rule (Weather/Harvest/Safety Escalation)")
+
+
+def render_confidence_meter(confidence: float) -> None:
+    """Render visual certainty factor progress bar with color-coded classification."""
+    val = max(0.0, min(1.0, confidence / 100.0))
+    st.progress(val, text=f"Certainty factor: {confidence}% confidence score")
 
 
 def render_explanation_expander(
@@ -122,6 +130,29 @@ with st.sidebar:
     st.success("Engine status: Certified operational", icon=":material/check_circle:")
     st.metric(label="Loaded rules", value=len(RULES), delta="Exceeds 50 required")
     st.metric(label="Targeted crops", value=5, delta="Pakistani major crops")
+
+    # Knowledge Base Domain Composition Chart
+    st.subheader("Knowledge base distribution")
+    rules_data = [
+        {"Domain": r.category.value.title(), "Crop": r.crop.title()}
+        for r in RULES
+    ]
+    df_rules = pd.DataFrame(rules_data)
+    domain_counts = df_rules["Domain"].value_counts().reset_index()
+    domain_counts.columns = ["Domain", "Rule count"]
+
+    chart_kb = (
+        alt.Chart(domain_counts)
+        .mark_bar(cornerRadiusEnd=4)
+        .encode(
+            x=alt.X("Rule count:Q", title="Number of rules"),
+            y=alt.Y("Domain:N", sort="-x", title="Domain"),
+            color=alt.Color("Domain:N", legend=None)
+        )
+        .properties(height=140)
+    )
+    st.altair_chart(chart_kb, width="stretch", alt="Knowledge base rule count distribution across Disease, Pest, and Nutrient domains")
+
     st.divider()
     st.subheader("System architecture")
     st.markdown(
@@ -237,6 +268,9 @@ with tab_disease:
                     m1.metric("Certainty score", f"{result.confidence}%")
                     m2.metric("Severity", result.details.get("severity", "Moderate"))
                     m3.metric("Latency", f"{latency:.2f} ms")
+
+                    # Certainty factor visual meter
+                    render_confidence_meter(result.confidence)
 
                     # Rule Category Badge
                     render_modality_badge(result.details.get("rule_type", "hardcoded"), result.confidence)
@@ -406,6 +440,9 @@ with tab_pest:
                     p1.metric("Certainty score", f"{pest_result.confidence}%")
                     p2.metric("Severity tier", pest_result.details.get("severity_tier", "Moderate"))
                     p3.metric("Latency", f"{latency:.2f} ms")
+
+                    # Certainty factor visual meter
+                    render_confidence_meter(pest_result.confidence)
 
                     # Pre-Harvest Lockout Warning Callout
                     if pest_result.chemical_blocked:
