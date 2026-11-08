@@ -27,12 +27,12 @@
 8. Summary: Exactly 5 lines in one paragraph.
 9. Format: Main headings Bold + Italic + Underlined; 100% black font, zero colors, zero table fills.
 **Acceptance criteria:**
-- [ ] Document generated at `Project_Report_Expert_System.docx`.
-- [ ] All main headings are bold, italic, and underlined.
-- [ ] Tables use only black text and white cells (no blue, light blue, or colored shading).
-- [ ] Requirements extracted from `expert-system.md`.
+- [x] Document generated at `Project_Report_Expert_System.docx`.
+- [x] All main headings are bold, italic, and underlined.
+- [x] Tables use only black text and white cells (no blue, light blue, or colored shading).
+- [x] Requirements extracted from `expert-system.md`.
 **Verification:**
-- [ ] Python script runs cleanly and inspects generated docx structure.
+- [x] Python script runs cleanly and inspects generated docx structure.
 **Dependencies:** Task 1
 **Files likely touched:**
 - `scripts/generate_docx_report.py`
@@ -42,5 +42,5 @@
 ---
 
 ## Checkpoint: Sign-off and Delivery
-- [ ] Document verified and confirmed on disk.
-- [ ] Ready for user editing and viva submission.
+- [x] Document verified and confirmed on disk.
+- [x] Ready for user editing and viva submission.
