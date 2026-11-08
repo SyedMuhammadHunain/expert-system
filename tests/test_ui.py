@@ -142,3 +142,50 @@ def test_pest_tab_single_damage_partial_match():
     warning_texts = [w.value for w in at.warning]
     assert any("Aphid" in w for w in warning_texts)
     assert not any("Unknown" in w for w in warning_texts)
+
+
+def test_dynamic_crop_switching_updates_symptom_options():
+    """Verify that switching crops reactively updates available symptoms without hard refresh."""
+    at = AppTest.from_file("../app.py")
+    at.run(timeout=10)
+
+    # Initial options are for Wheat
+    initial_options = at.multiselect("dis_symptoms_select").options
+    assert any("Stripe Rust" in opt for opt in initial_options)
+
+    # Switch to Cotton
+    at.selectbox("dis_crop_select").select("Cotton").run(timeout=10)
+    cotton_options = at.multiselect("dis_symptoms_select").options
+    assert any("CLCuV" in opt for opt in cotton_options)
+    assert not any("Stripe Rust" in opt for opt in cotton_options)
+
+    # Switch to Rice
+    at.selectbox("dis_crop_select").select("Rice").run(timeout=10)
+    rice_options = at.multiselect("dis_symptoms_select").options
+    assert any("Rice Blast" in opt for opt in rice_options)
+
+    # Switch to Sugarcane
+    at.selectbox("dis_crop_select").select("Sugarcane").run(timeout=10)
+    cane_options = at.multiselect("dis_symptoms_select").options
+    assert any("Red Rot" in opt for opt in cane_options)
+
+    # Switch to Maize
+    at.selectbox("dis_crop_select").select("Maize").run(timeout=10)
+    maize_options = at.multiselect("dis_symptoms_select").options
+    assert any("Turcicum" in opt for opt in maize_options)
+
+
+def test_dynamic_crop_switching_end_to_end_diagnosis():
+    """Verify switching crops dynamically and executing diagnosis yields correct crop result."""
+    at = AppTest.from_file("../app.py")
+    at.run(timeout=10)
+
+    # Switch to Rice reactively
+    at.selectbox("dis_crop_select").select("Rice").run(timeout=10)
+    at.multiselect("dis_symptoms_select").select("spindle_eye_shaped_lesions")
+    at.multiselect("dis_symptoms_select").select("brown_margin_grey_center")
+    at.button[0].click().run(timeout=10)
+
+    assert not at.exception
+    success_texts = [s.value for s in at.success]
+    assert any("Rice Blast" in s for s in success_texts)

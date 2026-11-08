@@ -39,11 +39,11 @@
 ## Task 3: Add Automated Headless AppTests for Dynamic Crop Switching
 **Description:** In `tests/test_ui.py`, add dedicated `AppTest` test cases that programmatically switch `dis_crop_select` from Wheat to Cotton, Maize, Rice, Sugarcane and verify that the symptom options in `dis_symptoms_select` update dynamically to the correct crop's symptoms without hard refresh.
 **Acceptance criteria:**
-- [ ] Headless test confirms `dis_symptoms_select` options switch from Wheat to Cotton after selectbox change.
-- [ ] Test confirms selecting Cotton symptom and clicking diagnose produces CLCuV or Bacterial Blight result.
-- [ ] Full test suite passes in < 3s.
+- [x] Headless test confirms `dis_symptoms_select` options switch from Wheat to Cotton after selectbox change.
+- [x] Test confirms selecting Cotton symptom and clicking diagnose produces CLCuV or Bacterial Blight result.
+- [x] Full test suite passes in < 3s.
 **Verification:**
-- [ ] `pytest -v tests/` 100% passing.
+- [x] `pytest -v tests/` 100% passing.
 **Dependencies:** Tasks 1, 2
 **Files likely touched:**
 - `tests/test_ui.py`
@@ -52,6 +52,6 @@
 ---
 
 ## Checkpoint 2: Verification and Git Push
-- [ ] Test suite completely green.
-- [ ] Verify live Streamlit app running at `http://127.0.0.1:8501`.
-- [ ] Push atomic commits to GitHub `origin/main`.
+- [x] Test suite completely green.
+- [x] Verify live Streamlit app running at `http://127.0.0.1:8501`.
+- [x] Push atomic commits to GitHub `origin/main`.
